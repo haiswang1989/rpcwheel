@@ -67,19 +67,11 @@ public class RpcServer {
     /**
      * 
      */
-    public Thread open() {
+    public void open() {
         final NettyRemotingServer server = new NettyRemotingServer(workerThreadCnt, bossThreadCnt, port);
         server.setChildChannelInitializer(new ServerChildHandler());
         server.init();
-        Thread startServerThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                server.open();
-            }
-        });
-        
-        startServerThread.start();
-        return startServerThread;
+        server.open();
     }
     
     public void register() {    

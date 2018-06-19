@@ -1,8 +1,8 @@
 package com.wheel.rpc.client;
 
 import com.wheel.rpc.client.proxy.ProxyFactory;
-import com.wheel.rpc.communication.channel.IRpcChannel;
-import com.wheel.rpc.communication.channel.impl.NettyRpcChannel;
+import com.wheel.rpc.communication.channel.IRpcWriteChannel;
+import com.wheel.rpc.communication.channel.impl.NettyRpcWriteChannel;
 import com.wheel.rpc.core.common.CommonUtils;
 import com.wheel.rpc.core.test.IHello;
 
@@ -17,24 +17,14 @@ import io.netty.channel.Channel;
 public class ClientMain {
 
     public static void main(String[] args) {
-        final RpcClient rpcClient = new RpcClient(CommonUtils.getLocalAddressIp(), 8889, 20);
-        //开启连接
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                rpcClient.open();
-            }
-        }).start();
+        RpcClient rpcClient = new RpcClient(CommonUtils.getLocalAddressIp(), 8889, 20);
+        rpcClient.open();
         
-        try {
-            Thread.sleep(5000l);
-        } catch (InterruptedException e) {
-        }
+        
         
         Channel channel = rpcClient.getChannel();
-        IRpcChannel rpcChannel = new NettyRpcChannel(channel);
-        
-        IHello proxyRef = ProxyFactory.createProxy(IHello.class, rpcChannel);
+        IRpcWriteChannel rpcWriteChannel = new NettyRpcWriteChannel(channel);
+        IHello proxyRef = ProxyFactory.createProxy(IHello.class, rpcWriteChannel);
         String resp = proxyRef.sayHello("wanghaisheng");
         System.out.println("resp : " + resp);
     }

@@ -9,13 +9,12 @@ import io.netty.channel.Channel;
  * @author hansen.wang
  * @date 2018年6月19日 上午11:52:49
  */
-public class NettyRpcChannel extends AbstractRpcChannel {
+public class NettyRpcWriteChannel extends AbstractRpcWriteChannel {
     
     private Channel nettyChannel;
     
-    public NettyRpcChannel(Channel channelArgs) {
+    public NettyRpcWriteChannel(Channel channelArgs) {
         this.nettyChannel = channelArgs;
-        
     }
     
     @Override

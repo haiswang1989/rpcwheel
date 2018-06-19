@@ -35,6 +35,8 @@ public class RpcClient {
         client.setChannelInitializer(new ClientHandler());
         client.init();
         client.open();
+        //等待连接成功后再返回
+        client.waitForDown();
     }
     
     /**

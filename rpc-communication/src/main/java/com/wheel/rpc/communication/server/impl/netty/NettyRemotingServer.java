@@ -93,14 +93,12 @@ public class NettyRemotingServer extends AbstractRemotingServer {
             System.exit(-1);
         }
         
+        //绑定已经完成
+        setOpenDown();
         //等待关闭
-        try {
-            channelFuture.channel().closeFuture().sync();
-        } catch (InterruptedException e) {
-            LOG.error("Server wait for close interrupted.", e);
-        }
+        waitForChannelCloseInAnotherThread(channelFuture.channel());
     }
-
+    
     @Override
     public void close() {
         bossGroup.shutdownGracefully();

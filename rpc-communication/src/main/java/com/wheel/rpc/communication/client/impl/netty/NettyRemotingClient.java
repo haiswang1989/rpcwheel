@@ -88,11 +88,9 @@ public class NettyRemotingClient extends AbstractRemotingClient {
             System.exit(-1);
         }
         
-        try {
-            clientChannel.closeFuture().sync();
-        } catch (InterruptedException e) {
-            LOG.error("Client wait for close interrupted.", e);
-        }
+        //连接已经完成
+        setOpenDown();
+        waitForChannelCloseInAnotherThread(clientChannel);
     }
 
     @Override

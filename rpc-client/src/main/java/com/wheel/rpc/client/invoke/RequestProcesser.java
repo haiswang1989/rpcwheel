@@ -1,7 +1,7 @@
 package com.wheel.rpc.client.invoke;
 
 import com.wheel.rpc.client.common.ClientResponseCache;
-import com.wheel.rpc.communication.channel.IRpcChannel;
+import com.wheel.rpc.communication.channel.IRpcWriteChannel;
 import com.wheel.rpc.core.model.RpcRequest;
 import com.wheel.rpc.core.model.RpcResponse;
 import com.wheel.rpc.core.model.RpcResponseHolder;
@@ -14,12 +14,12 @@ import com.wheel.rpc.core.model.RpcResponseHolder;
  */
 public class RequestProcesser {
     
-    private IRpcChannel rpcChannel;
+    private IRpcWriteChannel rpcWriteChannel;
     
     private RpcRequest rpcRequest;
     
-    public RequestProcesser(IRpcChannel rpcChannelArgs, RpcRequest rpcRequestArgs) {
-        this.rpcChannel = rpcChannelArgs;
+    public RequestProcesser(IRpcWriteChannel rpcWriteChannelArgs, RpcRequest rpcRequestArgs) {
+        this.rpcWriteChannel = rpcWriteChannelArgs;
         this.rpcRequest = rpcRequestArgs;
     }
     
@@ -27,7 +27,7 @@ public class RequestProcesser {
         String requestId = rpcRequest.getRequestId();
         RpcResponseHolder rpcResponseHolder = new RpcResponseHolder();
         ClientResponseCache.put(requestId, rpcResponseHolder);
-        rpcChannel.writeAndFlush(rpcRequest);
+        rpcWriteChannel.writeAndFlush(rpcRequest);
         return rpcResponseHolder.get();
     }
 }

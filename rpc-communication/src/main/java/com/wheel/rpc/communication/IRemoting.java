@@ -14,6 +14,11 @@ public interface IRemoting {
     public void open();
     
     /**
+     * 等待Open结束
+     */
+    public void waitForDown();
+    
+    /**
      * 关闭
      */
     public void close();
