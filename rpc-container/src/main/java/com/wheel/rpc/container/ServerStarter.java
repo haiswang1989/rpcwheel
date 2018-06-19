@@ -33,6 +33,7 @@ public class ServerStarter {
         RpcServer rpcServer = new RpcServer(8888, 20, 1, servicesArgs);
         rpcServer.setRegistryConfigBean(registryConfigBean);
         rpcServer.init();
+        
         Thread startServerThread = rpcServer.open();
         rpcServer.register();
         try {

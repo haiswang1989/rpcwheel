@@ -16,7 +16,6 @@ import com.wheel.rpc.core.model.ServiceGovernanceModel;
 import com.wheel.rpc.registry.IRegistry;
 import com.wheel.rpc.registry.impl.zookeeper.ZookeeperRegistry;
 
-import io.netty.channel.ChannelOption;
 import lombok.Setter;
 
 /**
@@ -69,9 +68,9 @@ public class RpcServer {
      * 
      */
     public Thread open() {
-        
         final NettyRemotingServer server = new NettyRemotingServer(workerThreadCnt, bossThreadCnt, port);
-        server.init().childHandler(new ServerChildHandler()).childOption(ChannelOption.TCP_NODELAY, true);
+        server.setChildChannelInitializer(new ServerChildHandler());
+        server.init();
         Thread startServerThread = new Thread(new Runnable() {
             @Override
             public void run() {

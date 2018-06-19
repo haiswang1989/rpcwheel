@@ -3,7 +3,8 @@ package com.wheel.rpc.client.proxy.jdk;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
-import com.wheel.rpc.client.RpcClient;
+import com.wheel.rpc.client.invoke.RequestProcesser;
+import com.wheel.rpc.communication.channel.IRpcChannel;
 import com.wheel.rpc.core.model.RpcRequest;
 import com.wheel.rpc.core.model.RpcResponse;
 import com.wheel.rpc.core.model.RpcStatus;
@@ -16,13 +17,13 @@ import com.wheel.rpc.core.model.RpcStatus;
  */
 public class ClientInvocationHandler implements InvocationHandler {
     
-    private RpcClient rpcClient;
+    private IRpcChannel rpcChannel;
     
     private Class<?> clazz;
     
-    public ClientInvocationHandler(Class<?> clazz, RpcClient rpcClient) {
-        this.rpcClient = rpcClient;
-        this.clazz = clazz;
+    public ClientInvocationHandler(Class<?> clazzArgs, IRpcChannel rpcChannelArgs) {
+        this.rpcChannel = rpcChannelArgs;
+        this.clazz = clazzArgs;
     }
     
     @Override
@@ -36,8 +37,8 @@ public class ClientInvocationHandler implements InvocationHandler {
         rpcRequest.setMethodName(methodName);
         rpcRequest.setParamsType(methodParamsType);
         rpcRequest.setParamsValue(args);
-        
-        RpcResponse rpcResponse = rpcClient.invoke(rpcRequest);
+        RequestProcesser processer = new RequestProcesser(rpcChannel, rpcRequest);
+        RpcResponse rpcResponse = processer.doInvoke();
         RpcStatus status = rpcResponse.getStatus();
         if(RpcStatus.SUCCESS.equals(status)) {
             return rpcResponse.getObj();

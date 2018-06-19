@@ -5,14 +5,17 @@ import org.slf4j.LoggerFactory;
 
 import com.wheel.rpc.communication.server.impl.AbstractRemotingServer;
 import com.wheel.rpc.core.common.CommonUtils;
+import com.wheel.rpc.core.exception.RpcException;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import lombok.Setter;
 
 /**
  * 基于Netty的服务端
@@ -25,9 +28,6 @@ public class NettyRemotingServer extends AbstractRemotingServer {
     
     public static final Logger LOG = LoggerFactory.getLogger(NettyRemotingServer.class);
     
-    private static final int THREAD_COUNT_WORKER = 10;
-    private static final int THREAD_COUNT_BOSS = 1;
-    
     private ServerBootstrap server; 
     
     /** 负责处理Client的请求 */ 
@@ -36,54 +36,52 @@ public class NettyRemotingServer extends AbstractRemotingServer {
     /** 负责IO的操作请求 */
     private EventLoopGroup workerGroup;
     
+    /** worker线程数 */
+    private int workerThreadCount;
+    
+    /** boss线程数 */
+    private int bossThreadCount;
+    
+    /** 服务端绑定端口 */
     private int port;
     
     private ChannelFuture channelFuture;
     
-    public NettyRemotingServer(int port) {
-        this(THREAD_COUNT_WORKER, THREAD_COUNT_BOSS, port);
-    }
+    /** child handler的初始化 ,处理IO请求的*/
+    @Setter
+    private ChannelInitializer<NioSocketChannel> childChannelInitializer;
     
-    public NettyRemotingServer(int workerThreadCount, int bossThreadCount, int port) {
-        this.bossGroup = new NioEventLoopGroup(bossThreadCount);
-        this.workerGroup = new NioEventLoopGroup(workerThreadCount);
-        this.port = port;
-        this.server = new ServerBootstrap();
-    }
+    /** handler的初始化,处理IO连接的 */
+    @Setter
+    private ChannelInitializer<NioSocketChannel> channelInitializer;
     
-    public NettyRemotingServer init() {
-        server.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class);
-        return this;
-    }
-    
-    /**
-     * handler是作用于client端连接server端时
-     * @param handler
-     * @return
-     */
-    public NettyRemotingServer handler(ChannelHandler handler) {
-        server.handler(handler);
-        return this;
+    public NettyRemotingServer(int workerThreadCountArgs, int bossThreadCountArgs, int portArgs) {
+        this.workerThreadCount = workerThreadCountArgs;
+        this.bossThreadCount = bossThreadCountArgs;
+        this.port = portArgs;
     }
     
     /**
-     * childHandler是作用于 client端与server端的IO请求
-     * @param handler
-     * @return
+     * 初始化
      */
-    public NettyRemotingServer childHandler(ChannelHandler handler) {
-        server.childHandler(handler);
-        return this;
+    public void init() {
+        check();
+        bossGroup = new NioEventLoopGroup(bossThreadCount);
+        workerGroup = new NioEventLoopGroup(workerThreadCount);
+        server = new ServerBootstrap();
+        server.group(bossGroup, workerGroup)
+            .channel(NioServerSocketChannel.class)
+            .childOption(ChannelOption.TCP_NODELAY, true)
+            .childHandler(childChannelInitializer);
     }
     
-    public <T> NettyRemotingServer childOption(ChannelOption<T> childOption, T value) {
-        server.childOption(childOption, value);
-        return this;
-    }
-    
-    public <T> NettyRemotingServer option(ChannelOption<T> option, T value) {
-        server.option(option, value);
-        return this;
+    /**
+     * 检查参数
+     */
+    private void check() {
+        if(null == childChannelInitializer) {
+            throw new RpcException("Child channelHandler is null, need to set.");
+        }
     }
     
     @Override
@@ -95,16 +93,12 @@ public class NettyRemotingServer extends AbstractRemotingServer {
             System.exit(-1);
         }
         
-        System.out.println("Container start success.");
-        
         //等待关闭
         try {
             channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             LOG.error("Server wait for close interrupted.", e);
         }
-        
-        System.out.println("Container closed.");
     }
 
     @Override

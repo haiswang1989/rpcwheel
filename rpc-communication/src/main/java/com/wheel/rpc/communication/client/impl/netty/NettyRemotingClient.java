@@ -4,19 +4,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.wheel.rpc.communication.client.impl.AbstractRemotingClient;
+import com.wheel.rpc.core.exception.RpcException;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
- * 
  * 基于Netty的client端
  * 
  * <p>Description:</p>
@@ -27,75 +28,71 @@ public class NettyRemotingClient extends AbstractRemotingClient {
     
     public static final Logger LOG = LoggerFactory.getLogger(NettyRemotingClient.class);
     
-    private static final int THREAD_POOL_SIZE = 5;
-    
+    /** 连接的netty server的IP */
     private String ip;
+    
+    /** 连接的netty server的端口 */
     private int port;
+    
+    /** IO操作线程数 */
     private int ioThreadCnt;
+    
     
     private Bootstrap bootstrap;
     private EventLoopGroup group;
     
-    private ChannelFuture channelFuture;
+    @Setter
+    private ChannelInitializer<NioSocketChannel> channelInitializer;
     
     @Getter
     private Channel clientChannel;
-    
-    public NettyRemotingClient(String ip, int port) {
-        this(ip, port, THREAD_POOL_SIZE);
-    }
     
     public NettyRemotingClient(String ip, int port, int ioThreadCnt) {
         this.ip = ip;
         this.port = port;
         this.ioThreadCnt = ioThreadCnt;
-        
-        group = new NioEventLoopGroup(this.ioThreadCnt);
+    }
+    
+    /**
+     * 初始化
+     */
+    public void init() {
+        check();
         bootstrap = new Bootstrap();
-        bootstrap.group(group).channel(NioSocketChannel.class);
+        group = new NioEventLoopGroup(this.ioThreadCnt);
+        bootstrap.group(group)
+                .channel(NioSocketChannel.class)
+                .option(ChannelOption.TCP_NODELAY, true)
+                .handler(channelInitializer);
+    }
+    
+    /**
+     * 检查参数
+     */
+    private void check() {
+        if(null == channelInitializer) {
+            throw new RpcException("ChannelHandler is null, need to set.");
+        }
     }
     
     /**
      * 
-     * @param option
-     * @param value
-     * @return
      */
-    public <T> NettyRemotingClient option(ChannelOption<T> option, T value) {
-        bootstrap.option(option, value);
-        return this;
-    }
-    
-    /**
-     * 
-     * @param handler
-     * @return
-     */
-    public NettyRemotingClient handler(ChannelHandler handler) {
-        bootstrap.handler(handler);
-        return this;
-    }
-    
     @Override
     public void open() {
         try {
-            channelFuture = bootstrap.connect(ip, port).sync();
+            ChannelFuture channelFuture = bootstrap.connect(ip, port).sync();
+            clientChannel = channelFuture.channel();
         } catch (InterruptedException e) {
             LOG.error("Connect to server failed.", e);
             System.exit(-1);
         }
-        
-        System.out.println("Connect to service success.");
-        
-        clientChannel = channelFuture.channel();
         
         try {
             clientChannel.closeFuture().sync();
         } catch (InterruptedException e) {
             LOG.error("Client wait for close interrupted.", e);
         }
-        
-        System.out.println("Connection is break.");
     }
 
     @Override

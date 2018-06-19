@@ -17,7 +17,6 @@ import com.wheel.rpc.proxy.common.ProxyServiceCache;
 import com.wheel.rpc.proxy.handler.client.ProxyAsClientHandler;
 import com.wheel.rpc.proxy.handler.server.ProxyAsServerChildHandler;
 
-import io.netty.channel.ChannelOption;
 import lombok.Setter;
 
 /**
@@ -64,8 +63,10 @@ public class ProxyServer {
             List<ServiceProviderNode> providerNodes = entry.getValue();
             ConcurrentHashMap<ServiceProviderNode, NettyRemotingClient> proxyClients = new ConcurrentHashMap<>();
             for (ServiceProviderNode serviceProviderNode : providerNodes) {
-                final NettyRemotingClient proxyClient = new NettyRemotingClient(serviceProviderNode.getHostname(), serviceProviderNode.getPort()); 
-                proxyClient.handler(new ProxyAsClientHandler()).option(ChannelOption.TCP_NODELAY, true);
+                final NettyRemotingClient proxyClient = new NettyRemotingClient(serviceProviderNode.getHostname(), serviceProviderNode.getPort(), 5);
+                proxyClient.setChannelInitializer(new ProxyAsClientHandler());
+                proxyClient.init();
+                
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -85,7 +86,9 @@ public class ProxyServer {
      */
     private Thread startProxyServer() {
         final NettyRemotingServer proxyServer = new NettyRemotingServer(serverWorkerThreadCount, serverBossThreadCount, serverPort);
-        proxyServer.init().childHandler(new ProxyAsServerChildHandler()).childOption(ChannelOption.TCP_NODELAY, true);
+        proxyServer.setChildChannelInitializer(new ProxyAsServerChildHandler());
+        proxyServer.init();
+        
         //单独开启一个线程启动server
         Thread startProxyServerThread = new Thread(new Runnable() {
             @Override

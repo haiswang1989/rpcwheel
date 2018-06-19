@@ -1,8 +1,12 @@
 package com.wheel.rpc.client;
 
 import com.wheel.rpc.client.proxy.ProxyFactory;
+import com.wheel.rpc.communication.channel.IRpcChannel;
+import com.wheel.rpc.communication.channel.impl.NettyRpcChannel;
 import com.wheel.rpc.core.common.CommonUtils;
 import com.wheel.rpc.core.test.IHello;
+
+import io.netty.channel.Channel;
 
 /**
  * 
@@ -27,8 +31,11 @@ public class ClientMain {
         } catch (InterruptedException e) {
         }
         
-        IHello proxyRef = ProxyFactory.createProxy(IHello.class, rpcClient);
+        Channel channel = rpcClient.getChannel();
+        IRpcChannel rpcChannel = new NettyRpcChannel(channel);
+        
+        IHello proxyRef = ProxyFactory.createProxy(IHello.class, rpcChannel);
         String resp = proxyRef.sayHello("wanghaisheng");
-        System.out.println("..." + resp);
+        System.out.println("resp : " + resp);
     }
 }

@@ -1,8 +1,8 @@
 package com.wheel.rpc.client.proxy;
 
-import com.wheel.rpc.client.RpcClient;
 import com.wheel.rpc.client.proxy.jdk.ClientInvocationHandler;
 import com.wheel.rpc.client.proxy.jdk.ProxyGenerator;
+import com.wheel.rpc.communication.channel.IRpcChannel;
 
 /**
  * 
@@ -15,11 +15,11 @@ public class ProxyFactory {
     /**
      * 
      * @param clazz
-     * @param rpcClient
+     * @param rpcChannel
      * @return
      */
-    public static <T> T createProxy(Class<T> clazz, RpcClient rpcClient) {
-        ClientInvocationHandler invocationHandler = new ClientInvocationHandler(clazz, rpcClient);
+    public static <T> T createProxy(Class<T> clazz, IRpcChannel rpcChannel) {
+        ClientInvocationHandler invocationHandler = new ClientInvocationHandler(clazz, rpcChannel);
         ProxyGenerator<T> proxyGenerator = new ProxyGenerator<>(clazz, invocationHandler);
         return proxyGenerator.get();
     }
