@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>rpc-wheel</groupId>
+	<artifactId>rpc-wheel</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<modules>
+		<module>rpc-client</module>
+		<module>rpc-proxy</module>
+		<module>rpc-container</module>
+		<module>rpc-core</module>
+		<module>rpc-serialization</module>
+		<module>rpc-registry</module>
+		<module>rpc-communication</module>
+	</modules>
+	
+	
+	<properties>
+        <spring.version>4.3.6.RELEASE</spring.version>
+        <commonslang.version>2.6</commonslang.version>
+        <commonconnections.version>3.2.1</commonconnections.version>
+        <lombok.version>1.16.18</lombok.version>
+        <zkclient.version>0.8</zkclient.version>
+        <guava.version>17.0</guava.version>
+        <fastjson.version>1.2.47</fastjson.version>
+        <slf4j.version>1.7.25</slf4j.version>
+        <log4j.version>1.2.17</log4j.version>
+        <netty.version>4.0.33.Final</netty.version>
+    </properties>
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+	            <groupId>io.netty</groupId>
+	            <artifactId>netty-all</artifactId>
+	            <version>${netty.version}</version>
+	        </dependency>
+        
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency> 
+            
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+            
+			<dependency>
+			    <groupId>com.alibaba</groupId>
+			    <artifactId>fastjson</artifactId>
+			    <version>${fastjson.version}</version>
+			</dependency>
+                    
+			<dependency>
+			    <groupId>commons-collections</groupId>
+			    <artifactId>commons-collections</artifactId>
+			    <version>${commonconnections.version}</version>
+			</dependency>
+        
+            <dependency>
+	            <groupId>com.google.guava</groupId>
+	            <artifactId>guava</artifactId>
+	            <version>${guava.version}</version>
+	        </dependency>
+	        
+	        <dependency>
+	            <groupId>com.101tec</groupId>
+	            <artifactId>zkclient</artifactId>
+	            <version>${zkclient.version}</version>
+	        </dependency>
+        
+	        <dependency>
+	            <groupId>org.springframework</groupId>
+	            <artifactId>spring-context</artifactId>
+	            <version>${spring.version}</version>
+	        </dependency>  
+	        
+	        <dependency>
+	            <groupId>org.springframework</groupId>
+	            <artifactId>spring-core</artifactId>
+	            <version>${spring.version}</version>
+	        </dependency>
+	        
+			<dependency>
+			    <groupId>commons-lang</groupId>
+			    <artifactId>commons-lang</artifactId>
+			    <version>${commonslang.version}</version>
+			</dependency>
+			
+			<dependency>
+			    <groupId>org.projectlombok</groupId>
+			    <artifactId>lombok</artifactId>
+			    <version>${lombok.version}</version>
+			    <scope>provided</scope>
+			</dependency>
+	    </dependencies>
+    </dependencyManagement>
+</project>
