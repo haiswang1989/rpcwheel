@@ -45,13 +45,16 @@ public abstract class AbstractRemoting implements IRemoting {
     /**
      * 异步的等待channel被关闭
      * @param channel
+     * @return
      */
-    protected void waitForChannelCloseInAnotherThread(final Channel channel) {
-        new Thread(new Runnable() {
+    protected Thread waitForChannelCloseInAnotherThread(final Channel channel) {
+        Thread waitThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 channel.closeFuture().syncUninterruptibly();
             }
-        }).start();
+        });
+        waitThread.start();
+        return waitThread;
     }
 }

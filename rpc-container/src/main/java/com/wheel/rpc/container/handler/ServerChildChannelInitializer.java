@@ -1,8 +1,5 @@
-package com.wheel.rpc.container;
+package com.wheel.rpc.container.handler;
 
-import com.wheel.rpc.container.handler.DegradationHandler;
-import com.wheel.rpc.container.handler.LimiterHandler;
-import com.wheel.rpc.container.handler.RequestHandler;
 import com.wheel.rpc.core.handler.DecodeHandler;
 import com.wheel.rpc.core.handler.EncodeHandler;
 import com.wheel.rpc.core.handler.serialize.DeserializeHandler;
@@ -18,7 +15,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
  * @author hansen.wang
  * @date 2018年6月8日 下午2:34:01
  */
-public class ServerChildHandler extends ChannelInitializer<NioSocketChannel> {
+public class ServerChildChannelInitializer extends ChannelInitializer<NioSocketChannel> {
     
     @Override
     protected void initChannel(NioSocketChannel ch) throws Exception {

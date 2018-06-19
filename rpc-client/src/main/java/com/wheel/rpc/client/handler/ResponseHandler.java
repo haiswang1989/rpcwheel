@@ -1,6 +1,6 @@
 package com.wheel.rpc.client.handler;
 
-import com.wheel.rpc.client.common.ClientResponseCache;
+import com.wheel.rpc.client.common.ResponseHolderCache;
 import com.wheel.rpc.core.model.RpcResponse;
 import com.wheel.rpc.core.model.RpcResponseHolder;
 
@@ -18,10 +18,10 @@ public class ResponseHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         RpcResponse rpcResponse = (RpcResponse)msg;
-        RpcResponseHolder responseHolder = ClientResponseCache.get(rpcResponse.getRequestId());
+        RpcResponseHolder responseHolder = ResponseHolderCache.get(rpcResponse.getRequestId());
         //把对应的RequestId的Response
         responseHolder.set(rpcResponse);
         //删除映射
-        ClientResponseCache.remove(rpcResponse.getRequestId());
+        ResponseHolderCache.remove(rpcResponse.getRequestId());
     }
 }

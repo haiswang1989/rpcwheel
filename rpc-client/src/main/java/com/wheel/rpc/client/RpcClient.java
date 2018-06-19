@@ -1,6 +1,6 @@
 package com.wheel.rpc.client;
 
-import com.wheel.rpc.client.handler.ClientHandler;
+import com.wheel.rpc.client.handler.ClientChannelInitializer;
 import com.wheel.rpc.communication.client.impl.netty.NettyRemotingClient;
 
 import io.netty.channel.Channel;
@@ -32,7 +32,7 @@ public class RpcClient {
     
     public void open() {
         client = new NettyRemotingClient(ip, port, ioThreadCnt);
-        client.setChannelInitializer(new ClientHandler());
+        client.setChannelInitializer(new ClientChannelInitializer());
         client.init();
         client.open();
         //等待连接成功后再返回

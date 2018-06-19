@@ -1,12 +1,13 @@
 package com.wheel.rpc.client.invoke;
 
-import com.wheel.rpc.client.common.ClientResponseCache;
+import com.wheel.rpc.client.common.ResponseHolderCache;
 import com.wheel.rpc.communication.channel.IRpcWriteChannel;
 import com.wheel.rpc.core.model.RpcRequest;
 import com.wheel.rpc.core.model.RpcResponse;
 import com.wheel.rpc.core.model.RpcResponseHolder;
 
 /**
+ * request请求的处理器
  * 
  * <p>Description:</p>
  * @author hansen.wang
@@ -14,8 +15,10 @@ import com.wheel.rpc.core.model.RpcResponseHolder;
  */
 public class RequestProcesser {
     
+    /** 写channel */
     private IRpcWriteChannel rpcWriteChannel;
     
+    /** 请求 */
     private RpcRequest rpcRequest;
     
     public RequestProcesser(IRpcWriteChannel rpcWriteChannelArgs, RpcRequest rpcRequestArgs) {
@@ -26,7 +29,7 @@ public class RequestProcesser {
     public RpcResponse doInvoke() {
         String requestId = rpcRequest.getRequestId();
         RpcResponseHolder rpcResponseHolder = new RpcResponseHolder();
-        ClientResponseCache.put(requestId, rpcResponseHolder);
+        ResponseHolderCache.put(requestId, rpcResponseHolder);
         rpcWriteChannel.writeAndFlush(rpcRequest);
         return rpcResponseHolder.get();
     }

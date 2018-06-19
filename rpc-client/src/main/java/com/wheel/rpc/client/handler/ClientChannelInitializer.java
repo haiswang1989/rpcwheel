@@ -16,7 +16,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
  * @author hansen.wang
  * @date 2018年6月7日 上午10:27:07
  */
-public class ClientHandler extends ChannelInitializer<NioSocketChannel> {
+public class ClientChannelInitializer extends ChannelInitializer<NioSocketChannel> {
     
     @Override
     protected void initChannel(NioSocketChannel ch) throws Exception {

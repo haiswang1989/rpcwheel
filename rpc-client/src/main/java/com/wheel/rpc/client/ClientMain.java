@@ -17,10 +17,13 @@ import io.netty.channel.Channel;
 public class ClientMain {
 
     public static void main(String[] args) {
-        RpcClient rpcClient = new RpcClient(CommonUtils.getLocalAddressIp(), 8889, 20);
+        
+        String ip = CommonUtils.getLocalAddressIp();
+        int port = 8889;
+        int ioThreadCnt = 20;
+        
+        RpcClient rpcClient = new RpcClient(ip, port, ioThreadCnt);
         rpcClient.open();
-        
-        
         
         Channel channel = rpcClient.getChannel();
         IRpcWriteChannel rpcWriteChannel = new NettyRpcWriteChannel(channel);

@@ -6,7 +6,8 @@ import java.util.List;
 import org.I0Itec.zkclient.ZkClient;
 
 import com.wheel.rpc.communication.server.impl.netty.NettyRemotingServer;
-import com.wheel.rpc.container.common.ServerServiceRefCache;
+import com.wheel.rpc.container.common.ServicesRefCache;
+import com.wheel.rpc.container.handler.ServerChildChannelInitializer;
 import com.wheel.rpc.core.common.CommonUtils;
 import com.wheel.rpc.core.config.bean.RegistryConfigBean;
 import com.wheel.rpc.core.config.bean.ServiceConfigBean;
@@ -69,7 +70,7 @@ public class RpcServer {
      */
     public void open() {
         final NettyRemotingServer server = new NettyRemotingServer(workerThreadCnt, bossThreadCnt, port);
-        server.setChildChannelInitializer(new ServerChildHandler());
+        server.setChildChannelInitializer(new ServerChildChannelInitializer());
         server.init();
         server.open();
     }
@@ -78,7 +79,7 @@ public class RpcServer {
         for (ServiceConfigBean<?> serviceConfigBean : services) {
             String serviceName = serviceConfigBean.getInterfaceClazz().getName();
             Object ref = serviceConfigBean.getRef();
-            ServerServiceRefCache.put(serviceName, ref);
+            ServicesRefCache.put(serviceName, ref);
             
             RegistryModel registryModel = new RegistryModel();
             registryModel.setService(serviceConfigBean.getInterfaceClazz());
