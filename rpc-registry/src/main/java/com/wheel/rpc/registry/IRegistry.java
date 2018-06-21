@@ -3,6 +3,7 @@ package com.wheel.rpc.registry;
 import java.util.List;
 
 import com.wheel.rpc.core.model.RegistryModel;
+import com.wheel.rpc.core.model.ServiceGovernanceModel;
 import com.wheel.rpc.core.model.ServiceProviderNode;
 import com.wheel.rpc.notify.INotify;
 
@@ -45,4 +46,11 @@ public interface IRegistry {
      * @return
      */
     public List<ServiceProviderNode> serviceOnlineNodes(String serviceName);
+    
+    /**
+     * 服务的治理策略
+     * @param serviceName
+     * @return
+     */
+    public ServiceGovernanceModel serviceGovernanceStrategy(String serviceName);
 }

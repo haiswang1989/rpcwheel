@@ -24,19 +24,32 @@ public class ProxySreverStarter {
     
     public static void main(String[] args) {
         
-        InputStream is = ProxyServer.class.getClassLoader().getResourceAsStream("proxy.properties");
+        int port = 0;
+        int workerCnt = 0;
+        int bossCnt = 0;
+        int proxy2ServerWorkerCnt = 0;
+        
+        InputStream is = null;
         Properties prop = new Properties();
         try {
+            is = ProxyServer.class.getClassLoader().getResourceAsStream("proxy.properties");
             prop.load(is);
+            port = Integer.parseInt(prop.getProperty("proxy.rpc.port"));
+            workerCnt = Integer.parseInt(prop.getProperty("proxy.rpc.netty.thread.worker"));
+            bossCnt = Integer.parseInt(prop.getProperty("proxy.rpc.netty.thread.boss"));
+            proxy2ServerWorkerCnt = Integer.parseInt(prop.getProperty("proxy2server.rpc.netty.thread.worker"));
         } catch (IOException e1) {
             LOG.error("", e1);
             System.exit(-1);
+        } finally {
+            if(null!=is) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                }
+            }
         }
         
-        int port = Integer.parseInt(prop.getProperty("proxy.rpc.port"));
-        int workerCnt = Integer.parseInt(prop.getProperty("proxy.rpc.netty.thread.worker"));
-        int bossCnt = Integer.parseInt(prop.getProperty("proxy.rpc.netty.thread.boss"));
-        int proxy2ServerWorkerCnt = Integer.parseInt(prop.getProperty("proxy2server.rpc.netty.thread.worker"));
         
         List<Class<?>> proxyServicesArgs = new ArrayList<>();
         proxyServicesArgs.add(IHello.class);

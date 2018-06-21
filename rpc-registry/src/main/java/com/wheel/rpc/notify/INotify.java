@@ -3,6 +3,7 @@ package com.wheel.rpc.notify;
 import java.util.List;
 
 import com.wheel.rpc.core.model.ServiceGovernanceModel;
+import com.wheel.rpc.core.model.ServiceProviderNode;
 
 /**
  * 对于client端的订阅,发生变化时触发的"通知"
@@ -18,7 +19,7 @@ public interface INotify {
      * @param serviceName 
      * @param nodes
      */
-    public void serviceNodes(String serviceName, List<String> nodes);
+    public void serviceNodes(String serviceName, List<ServiceProviderNode> nodes);
     
     /**
      * 服务下线

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.I0Itec.zkclient.ZkClient;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.wheel.rpc.core.common.CommonUtils;
 import com.wheel.rpc.core.common.Constants;
@@ -139,5 +140,16 @@ public class ZookeeperRegistry extends AbstractRegistry {
         }
         
         return onlineProviderNodes;
+    }
+    
+    @Override
+    public ServiceGovernanceModel serviceGovernanceStrategy(String serviceName) {
+        String servicePath = CommonUtils.getServicePath(serviceName);
+        String json = zkClient.readData(servicePath, true);
+        if(null == json) {
+            return null;
+        }
+        
+        return JSONObject.parseObject(json, ServiceGovernanceModel.class);
     }
 }

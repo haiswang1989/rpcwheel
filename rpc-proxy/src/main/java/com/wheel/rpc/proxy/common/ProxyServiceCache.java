@@ -20,10 +20,10 @@ public class ProxyServiceCache {
     private static List<Class<?>> proxyServices;
     
     /** 服务名称 - 服务的Provider的集合 */
-    private static ConcurrentHashMap<String, List<ServiceProviderNode>> SERVICES_PROVIDERS = new ConcurrentHashMap<>(); 
+    private static final ConcurrentHashMap<String, List<ServiceProviderNode>> SERVICES_PROVIDERS = new ConcurrentHashMap<>(); 
     
     /** Proxy与各个服务提供者的结点的保持的长连接 */
-    private static ConcurrentHashMap<String, ConcurrentHashMap<ServiceProviderNode, NettyRemotingClient>> SERVICES_NODES_REMOTINGCLIENTS = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, ConcurrentHashMap<ServiceProviderNode, NettyRemotingClient>> SERVICES_NODES_REMOTINGCLIENTS = new ConcurrentHashMap<>();
     
     /**
      * 
@@ -33,7 +33,8 @@ public class ProxyServiceCache {
     public static void init(List<Class<?>> proxyServicesArgs, IRegistry registry) {
         proxyServices = proxyServicesArgs;
         for (Class<?> clazz : proxyServices) {
-            SERVICES_PROVIDERS.put(clazz.getName(), registry.serviceOnlineNodes(clazz.getName()));
+            List<ServiceProviderNode> allOnlineNodes = registry.serviceOnlineNodes(clazz.getName());
+            SERVICES_PROVIDERS.put(clazz.getName(), allOnlineNodes);
         }
     }
     

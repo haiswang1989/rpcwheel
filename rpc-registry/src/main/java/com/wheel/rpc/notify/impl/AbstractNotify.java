@@ -3,6 +3,7 @@ package com.wheel.rpc.notify.impl;
 import java.util.List;
 
 import com.wheel.rpc.core.model.ServiceGovernanceModel;
+import com.wheel.rpc.core.model.ServiceProviderNode;
 import com.wheel.rpc.notify.INotify;
 
 /**
@@ -22,7 +23,7 @@ public abstract class AbstractNotify implements INotify {
     }
     
     @Override
-    public void serviceNodes(String serviceName, List<String> nodes) {
+    public void serviceNodes(String serviceName, List<ServiceProviderNode> nodes) {
     }
     
     @Override

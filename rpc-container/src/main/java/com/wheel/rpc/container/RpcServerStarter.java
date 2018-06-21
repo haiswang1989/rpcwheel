@@ -26,18 +26,30 @@ public class RpcServerStarter {
     public static final Logger LOG = LoggerFactory.getLogger(RpcServerStarter.class);
     
     public static void main(String[] args) {
-        InputStream is = RpcServerStarter.class.getClassLoader().getResourceAsStream("server.properties");
+        
+        int port = 0;
+        int workerCnt = 0;
+        int bossCnt = 0;
+        
+        InputStream is = null;
         Properties prop = new Properties();
         try {
+            is = RpcServerStarter.class.getClassLoader().getResourceAsStream("server.properties");
             prop.load(is);
+            port = Integer.parseInt(prop.getProperty("server.rpc.port"));
+            workerCnt = Integer.parseInt(prop.getProperty("server.rpc.netty.thread.worker"));
+            bossCnt = Integer.parseInt(prop.getProperty("server.rpc.netty.thread.boss"));
         } catch (IOException e) {
             LOG.error("", e);
             System.exit(-1);
+        } finally {
+            if(null!=is) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                }
+            }
         }
-        
-        int port = Integer.parseInt(prop.getProperty("server.rpc.port"));
-        int workerCnt = Integer.parseInt(prop.getProperty("server.rpc.netty.thread.worker"));
-        int bossCnt = Integer.parseInt(prop.getProperty("server.rpc.netty.thread.boss"));
         
         RegistryConfigBean registryConfigBean = new RegistryConfigBean();
         registryConfigBean.setProtocol("zookeeper");

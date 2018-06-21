@@ -42,7 +42,7 @@ public class ServiceGovernanceModel {
     private Map<ServiceProviderNode, Integer> nodesWeight = new HashMap<>();
     
     /** 结点的权重值是否相等 */
-    private boolean sameWeight;
+    //private boolean sameWeight;
     
     public ServiceGovernanceModel() {
     }

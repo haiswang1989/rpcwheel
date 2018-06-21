@@ -1,13 +1,11 @@
 package com.wheel.rpc.notify.impl.zookeeper;
 
-
 import org.I0Itec.zkclient.IZkDataListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
 import com.wheel.rpc.core.model.ServiceGovernanceModel;
-import com.wheel.rpc.util.RegistryUtils;
 
 /**
  * 结点数据变化的watcher
@@ -31,8 +29,7 @@ public class ZkNodeDataChangeWatcher implements IZkDataListener {
     @Override
     public void handleDataChange(String dataPath, Object data) throws Exception {
         ServiceGovernanceModel serviceGovernanceModel = JSON.parseObject(String.valueOf(data), ServiceGovernanceModel.class);
-        String serviceName = RegistryUtils.getServiceName(dataPath);
-        notify.serviceParamUpdate(serviceName, serviceGovernanceModel);
+        notify.serviceParamUpdate(notify.getServiceName(), serviceGovernanceModel);
     }
 
     @Override

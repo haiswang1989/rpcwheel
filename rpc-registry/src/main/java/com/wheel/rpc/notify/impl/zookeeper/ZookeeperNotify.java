@@ -2,7 +2,9 @@ package com.wheel.rpc.notify.impl.zookeeper;
 
 import java.util.List;
 
+import com.wheel.rpc.cache.RegistryCache;
 import com.wheel.rpc.core.model.ServiceGovernanceModel;
+import com.wheel.rpc.core.model.ServiceProviderNode;
 import com.wheel.rpc.notify.impl.AbstractNotify;
 
 import lombok.Getter;
@@ -35,10 +37,12 @@ public class ZookeeperNotify extends AbstractNotify {
     }
 
     @Override
-    public void serviceNodes(String serviceName, List<String> nodes) {
+    public void serviceNodes(String serviceName, List<ServiceProviderNode> nodes) {
+        RegistryCache.serviceOnlineNodeChange(serviceName, nodes);
     }
     
     @Override
     public void serviceParamUpdate(String serviceName, ServiceGovernanceModel serviceGovernanceModel) {
+        RegistryCache.serviceParamUpdate(serviceName, serviceGovernanceModel);
     }
 }

@@ -3,7 +3,8 @@ package com.wheel.rpc.notify.impl.zookeeper;
 import java.util.List;
 import org.I0Itec.zkclient.IZkChildListener;
 
-import com.wheel.rpc.util.RegistryUtils;
+import com.google.common.collect.Lists;
+import com.wheel.rpc.core.model.ServiceProviderNode;
 
 /**
  * 结点变化的watcher
@@ -24,7 +25,11 @@ public class ZkNodeChangeWatcher implements IZkChildListener {
     
     @Override
     public void handleChildChange(String parentPath, List<String> currentChilds) throws Exception {
-        String serviceName =RegistryUtils.getServiceName(parentPath);
-        notify.serviceNodes(serviceName, currentChilds);
+        List<ServiceProviderNode> onlineNodes = Lists.newArrayListWithCapacity(currentChilds.size());
+        for (String nodeInString : currentChilds) {
+            onlineNodes.add(new ServiceProviderNode(nodeInString));
+        }
+        
+        notify.serviceNodes(notify.getServiceName(), onlineNodes);
     }
 }

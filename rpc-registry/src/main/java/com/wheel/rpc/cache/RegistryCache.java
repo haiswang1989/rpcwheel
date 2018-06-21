@@ -1,18 +1,12 @@
 package com.wheel.rpc.cache;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import org.I0Itec.zkclient.ZkClient;
-
-import com.alibaba.fastjson.JSONObject;
-import com.wheel.rpc.core.common.CommonUtils;
-import com.wheel.rpc.core.common.Constants;
 import com.wheel.rpc.core.model.ServiceGovernanceModel;
 import com.wheel.rpc.core.model.ServiceProviderNode;
-import com.wheel.rpc.core.zookeeper.utils.ZkUtils;
+import com.wheel.rpc.registry.IRegistry;
 
 /**
  * 服务治理相关的信息
@@ -23,33 +17,29 @@ import com.wheel.rpc.core.zookeeper.utils.ZkUtils;
  * @author hansen.wang
  * @date 2018年6月11日 上午11:45:29
  */
-public class ServiceGovernanceCache {
+public class RegistryCache {
     
     /** 服务与服务的治理参数的映射 */
-    private static Map<String, ServiceGovernanceModel>  servicesGovernanceModel = new HashMap<>();
+    private static ConcurrentHashMap<String, ServiceGovernanceModel>  SERVICES_GOVERNANCE_STRATEGY = new ConcurrentHashMap<>();
     
     /** 服务与服务当前在线的服务列表 */
-    private static Map<String, List<ServiceProviderNode>> servicesOnlineNodes = new HashMap<>();
+    private static ConcurrentHashMap<String, List<ServiceProviderNode>> SERVICES_PROVIDERS = new ConcurrentHashMap<>();    
+    
+    private static IRegistry registry;
     
     /**
      * 初始化服务配置
      * @param zkClient
      * @param clazzes
      */
-    public static void init(ZkClient zkClient, List<Class<?>> clazzes) {
+    public static void init(List<Class<?>> clazzes) {
         for (Class<?> clazz : clazzes) {
-            String servicePath = CommonUtils.appendString(Constants.RPC_WHEEL_ROOT_PATH, Constants.PATH_SEPARATOR, clazz.getName());
-            //治理参数
-            Object data = ZkUtils.getPathData(servicePath, zkClient);
-            ServiceGovernanceModel serviceGovernanceModel = null;
-            if(null!=data) {
-                serviceGovernanceModel = JSONObject.parseObject(String.valueOf(data), ServiceGovernanceModel.class);
-            } else {
-                serviceGovernanceModel = new ServiceGovernanceModel();
-            }
-            servicesGovernanceModel.put(clazz.getName(), serviceGovernanceModel);
-            //在线服务
-            servicesOnlineNodes.put(clazz.getName(), ZkUtils.getServiceOnlineNodes(servicePath, zkClient));
+            ServiceGovernanceModel serviceGovernanceModel = registry.serviceGovernanceStrategy(clazz.getName());
+            //服务的治理信息
+            SERVICES_GOVERNANCE_STRATEGY.put(clazz.getName(), serviceGovernanceModel);
+            List<ServiceProviderNode> allOnlineNodes = registry.serviceOnlineNodes(clazz.getName());
+            //服务的在线结点
+            SERVICES_PROVIDERS.put(clazz.getName(), allOnlineNodes);
         }
     }
     
@@ -60,7 +50,12 @@ public class ServiceGovernanceCache {
      * @param parentPath 变化的结点
      * @param currentChilds 变化后的子结点
      */
-    public static void childChange(String serviceName, List<String> childsAfterChange) {
+    public static void serviceOnlineNodeChange(String serviceName, List<ServiceProviderNode> childsAfterChange) {
+        List<ServiceProviderNode> currentOnlineNodes = SERVICES_PROVIDERS.get(serviceName);
+        
+        //TODO 上线下线
+        
+        
     }
     
     /**
@@ -77,7 +72,7 @@ public class ServiceGovernanceCache {
      * @return
      */
     public static List<ServiceProviderNode> getOnlineNodes(String serviceName) {
-        List<ServiceProviderNode> nodes = servicesOnlineNodes.get(serviceName);
+        List<ServiceProviderNode> nodes = SERVICES_PROVIDERS.get(serviceName);
         if(null == nodes) {
             nodes = new ArrayList<>();
         }
@@ -91,7 +86,7 @@ public class ServiceGovernanceCache {
      * @return
      */
     public static ServiceGovernanceModel getServiceGovernance(String serviceName) {
-        ServiceGovernanceModel serviceGovernanceModel = servicesGovernanceModel.get(serviceName);
+        ServiceGovernanceModel serviceGovernanceModel = SERVICES_GOVERNANCE_STRATEGY.get(serviceName);
         if(null == serviceGovernanceModel) {
             serviceGovernanceModel = new ServiceGovernanceModel();
         }
