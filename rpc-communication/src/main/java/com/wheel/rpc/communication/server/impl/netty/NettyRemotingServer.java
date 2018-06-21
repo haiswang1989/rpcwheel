@@ -85,7 +85,7 @@ public class NettyRemotingServer extends AbstractRemotingServer {
     }
     
     @Override
-    public void open() {
+    public Thread open() {
         try {
             channelFuture = server.bind(CommonUtils.getLocalAddressIp(), port).sync();
         } catch (InterruptedException e) {
@@ -96,7 +96,7 @@ public class NettyRemotingServer extends AbstractRemotingServer {
         //绑定已经完成
         setOpenDown();
         //等待关闭
-        waitForChannelCloseInAnotherThread(channelFuture.channel());
+        return waitForChannelCloseInAnotherThread(channelFuture.channel());
     }
     
     @Override

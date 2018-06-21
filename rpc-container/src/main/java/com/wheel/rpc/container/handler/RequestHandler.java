@@ -20,7 +20,6 @@ public class RequestHandler extends ChannelInboundHandlerAdapter {
         RpcRequest rpcRequest = (RpcRequest)msg;
         RequestInvoker invoker = new RequestInvoker(rpcRequest);
         Object response = invoker.doInvoker();
-        
         //往回写结果
         ctx.writeAndFlush(response);
     }

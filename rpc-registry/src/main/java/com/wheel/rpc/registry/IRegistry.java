@@ -1,6 +1,9 @@
 package com.wheel.rpc.registry;
 
+import java.util.List;
+
 import com.wheel.rpc.core.model.RegistryModel;
+import com.wheel.rpc.core.model.ServiceProviderNode;
 import com.wheel.rpc.notify.INotify;
 
 /**
@@ -35,4 +38,11 @@ public interface IRegistry {
      * @return
      */
     public void unsubscribe(INotify notify);
+    
+    /**
+     * 获取服务的在线结点
+     * @param serviceName
+     * @return
+     */
+    public List<ServiceProviderNode> serviceOnlineNodes(String serviceName);
 }

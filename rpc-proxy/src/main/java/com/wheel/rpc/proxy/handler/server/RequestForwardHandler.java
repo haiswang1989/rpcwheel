@@ -23,6 +23,12 @@ public class RequestForwardHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         RpcRequest request = (RpcRequest)msg;
         NettyRemotingClient nettyRemotingClient = ProxyServiceCache.getNettyRemotingClient(request.getServiceName(), request.getProvider());
+        if(null == nettyRemotingClient) {
+            //TODO 这边可能获取不到指定的连接
+            //服务的Provider刚刚下线,proxy端还没有感知
+            //服务的Provider都下线了
+        }
+        
         RpcResponseHolder rpcResponseHolder = ProxyRequestCache.setRequest(request);
         //通过proxy与server端的连接,将请求转发到server端
         nettyRemotingClient.getClientChannel().writeAndFlush(request);

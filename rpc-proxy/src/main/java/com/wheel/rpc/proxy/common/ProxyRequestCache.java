@@ -7,6 +7,7 @@ import com.wheel.rpc.core.model.RpcResponse;
 import com.wheel.rpc.core.model.RpcResponseHolder;
 
 /**
+ * proxy端 请求id和response的hodler的映射
  * 
  * <p>Description:</p>
  * @author hansen.wang
@@ -14,6 +15,7 @@ import com.wheel.rpc.core.model.RpcResponseHolder;
  */
 public class ProxyRequestCache {
     
+    /** 请求id 请求response的holder的映射 */
     private static final ConcurrentHashMap<String, RpcResponseHolder> RESPONSE_HOLDER = new ConcurrentHashMap<>();
     
     /**
@@ -28,13 +30,19 @@ public class ProxyRequestCache {
     }
     
     /**
-     * 
+     * 设置请求的response
      * @param requestId
      */
-    public static void setResponse(String requestId, RpcResponse response) {
+    public static boolean setResponse(String requestId, RpcResponse response) {
         RpcResponseHolder rpcResponseHolder = RESPONSE_HOLDER.get(requestId);
+        if(null == rpcResponseHolder) {
+            return false;
+        }
+        
         rpcResponseHolder.set(response);
+        //从缓存中删除responseholder
         RESPONSE_HOLDER.remove(requestId);
+        return true;
     }
 }
 

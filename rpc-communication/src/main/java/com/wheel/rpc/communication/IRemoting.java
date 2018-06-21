@@ -11,7 +11,7 @@ public interface IRemoting {
     /**
      * 打开
      */
-    public void open();
+    public Thread open();
     
     /**
      * 等待Open结束

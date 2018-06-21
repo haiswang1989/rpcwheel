@@ -3,7 +3,7 @@ package com.wheel.rpc.container;
 import java.net.InetSocketAddress;
 import java.util.List;
 
-import org.I0Itec.zkclient.ZkClient;
+import org.apache.commons.collections.CollectionUtils;
 
 import com.wheel.rpc.communication.server.impl.netty.NettyRemotingServer;
 import com.wheel.rpc.container.common.ServicesRefCache;
@@ -11,11 +11,11 @@ import com.wheel.rpc.container.handler.ServerChildChannelInitializer;
 import com.wheel.rpc.core.common.CommonUtils;
 import com.wheel.rpc.core.config.bean.RegistryConfigBean;
 import com.wheel.rpc.core.config.bean.ServiceConfigBean;
+import com.wheel.rpc.core.exception.RpcException;
 import com.wheel.rpc.core.model.RegistryModel;
-import com.wheel.rpc.core.model.RegistryProtocal;
 import com.wheel.rpc.core.model.ServiceGovernanceModel;
 import com.wheel.rpc.registry.IRegistry;
-import com.wheel.rpc.registry.impl.zookeeper.ZookeeperRegistry;
+import com.wheel.rpc.registry.RegistryFactory;
 
 import lombok.Setter;
 
@@ -27,19 +27,22 @@ import lombok.Setter;
  */
 public class RpcServer {
     
-    private int port;
-    
+    /** 服务的worker线程数 */
     private int workerThreadCnt;
     
+    /** 服务的boss线程数 */
     private int bossThreadCnt;
     
+    /** 服务监听的端口 */
+    private int port;
+    
+    /** 服务列表 */
     private List<ServiceConfigBean<?>> services;
     
     @Setter
     private RegistryConfigBean registryConfigBean;
     
-    private ZkClient zkClient;
-    
+    /** 注册中心 */
     private IRegistry registry;
     
     public RpcServer(int port, List<ServiceConfigBean<?>> servicesArgs) {
@@ -54,27 +57,41 @@ public class RpcServer {
         
     }
     
+    /**
+     * 初始化
+     */
     public void init() {
-        //初始化zkclient
-        String protocal = registryConfigBean.getProtocol();
-        String connection = registryConfigBean.getConnection();
-        if(RegistryProtocal.ZOOKEEPER.is(protocal)) {
-            zkClient = new ZkClient(connection);
+        check();
+        registry = RegistryFactory.createRegistry(registryConfigBean);
+    }
+    
+    /**
+     * check
+     */
+    private void check() {
+        if(null == registryConfigBean) {
+            throw new RpcException("Registry config can not be null.");
         }
         
-        registry = new ZookeeperRegistry(zkClient);
+        if(CollectionUtils.isEmpty(services)) {
+            throw new RpcException("Service list can not be null.");
+        }
     }
     
     /**
      * 
      */
     public void open() {
-        final NettyRemotingServer server = new NettyRemotingServer(workerThreadCnt, bossThreadCnt, port);
+        NettyRemotingServer server = new NettyRemotingServer(workerThreadCnt, bossThreadCnt, port);
         server.setChildChannelInitializer(new ServerChildChannelInitializer());
         server.init();
         server.open();
+        server.waitForDown();
     }
     
+    /**
+     * 将自己注册到注册中心
+     */
     public void register() {    
         for (ServiceConfigBean<?> serviceConfigBean : services) {
             String serviceName = serviceConfigBean.getInterfaceClazz().getName();

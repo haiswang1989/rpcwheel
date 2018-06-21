@@ -35,7 +35,7 @@ public abstract class AbstractRemoting implements IRemoting {
     /**
      * 设置isOpenDown标记为true,表示open操作完成
      */
-    public void setOpenDown() {
+    protected void setOpenDown() {
         synchronized (LOCK) {
             isOpenDown = true;
             LOCK.notifyAll();

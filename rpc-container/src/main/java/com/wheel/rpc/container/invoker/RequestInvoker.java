@@ -11,6 +11,7 @@ import com.wheel.rpc.core.model.RpcResponse;
 import com.wheel.rpc.core.model.RpcStatus;
 
 /**
+ * 对反射调用
  * 
  * <p>Description:</p>
  * @author hansen.wang
@@ -80,6 +81,7 @@ public class RequestInvoker {
             status = RpcStatus.ERROR;
         }
         
+        //构造返回值
         RpcResponse response = new RpcResponse();
         response.setRequestId(requestId);
         response.setObj(result);
@@ -87,5 +89,4 @@ public class RequestInvoker {
         response.setE(ex);
         return response;
     }
-    
 }

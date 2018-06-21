@@ -1,12 +1,17 @@
 package com.wheel.rpc.registry.impl.zookeeper;
 
 import java.net.InetSocketAddress;
+import java.util.List;
+
 import org.I0Itec.zkclient.ZkClient;
 
+import com.google.common.collect.Lists;
 import com.wheel.rpc.core.common.CommonUtils;
 import com.wheel.rpc.core.common.Constants;
+import com.wheel.rpc.core.config.bean.RegistryConfigBean;
 import com.wheel.rpc.core.model.RegistryModel;
 import com.wheel.rpc.core.model.ServiceGovernanceModel;
+import com.wheel.rpc.core.model.ServiceProviderNode;
 import com.wheel.rpc.core.zookeeper.utils.ZkUtils;
 import com.wheel.rpc.notify.INotify;
 import com.wheel.rpc.notify.impl.zookeeper.ZkNodeChangeWatcher;
@@ -26,8 +31,8 @@ public class ZookeeperRegistry extends AbstractRegistry {
     /** 与注册中心的连接 */
     private ZkClient zkClient;
     
-    public ZookeeperRegistry(ZkClient zkClientArgs) {
-        this.zkClient = zkClientArgs;
+    public ZookeeperRegistry(RegistryConfigBean registryConfigBean) {
+        this.zkClient = new ZkClient(registryConfigBean.getConnection());
     }
     
     @Override
@@ -121,5 +126,18 @@ public class ZookeeperRegistry extends AbstractRegistry {
         //取消订阅服务结点的上下线
         ZkUtils.unSubscribeServiceOnOffline(servicePath, zkNodeChangeWatcher, zkClient);
         ZkUtils.unSubscribeServiceParamChange(servicePath, serviceGovernanceDataChangeWatcher, zkClient);
+    }
+    
+    @Override
+    public List<ServiceProviderNode> serviceOnlineNodes(String serviceName) {
+        //服务在zk上面绝对路径
+        String servicePath = CommonUtils.getServicePath(serviceName);
+        List<String> onlineNodes = zkClient.getChildren(servicePath);
+        List<ServiceProviderNode> onlineProviderNodes = Lists.newArrayListWithCapacity(onlineNodes.size());
+        for (String onlineNode : onlineNodes) {
+            onlineProviderNodes.add(new ServiceProviderNode(onlineNode));
+        }
+        
+        return onlineProviderNodes;
     }
 }

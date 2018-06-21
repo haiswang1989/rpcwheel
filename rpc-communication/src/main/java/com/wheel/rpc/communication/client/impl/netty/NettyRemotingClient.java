@@ -79,7 +79,7 @@ public class NettyRemotingClient extends AbstractRemotingClient {
      * 
      */
     @Override
-    public void open() {
+    public Thread open() {
         try {
             ChannelFuture channelFuture = bootstrap.connect(ip, port).sync();
             clientChannel = channelFuture.channel();
@@ -90,7 +90,7 @@ public class NettyRemotingClient extends AbstractRemotingClient {
         
         //连接已经完成
         setOpenDown();
-        waitForChannelCloseInAnotherThread(clientChannel);
+        return waitForChannelCloseInAnotherThread(clientChannel);
     }
 
     @Override

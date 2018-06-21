@@ -32,11 +32,12 @@ public class LoadbalanceHandler extends ChannelInboundHandlerAdapter {
     
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println("LoadbalanceHandler." + loadbalance);
         RpcRequest request = (RpcRequest)msg;
-        
         String serviceName = request.getServiceName();
         List<ServiceProviderNode> providerNodes = ProxyServiceCache.getServicesProviders(serviceName);
+        
+        //TODO 
+        //这边需要使用负载均衡算法,获取指定的ProviderNode
         request.setProvider(providerNodes.get(0));
         ctx.fireChannelRead(msg);
         

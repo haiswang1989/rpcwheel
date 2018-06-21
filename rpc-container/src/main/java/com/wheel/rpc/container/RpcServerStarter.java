@@ -15,7 +15,7 @@ import com.wheel.rpc.core.test.impl.HelloImpl;
  * @author hansen.wang
  * @date 2018年6月8日 下午2:11:24
  */
-public class ServerStarter {
+public class RpcServerStarter {
     
     
     public static void main(String[] args) {
