@@ -1,7 +1,13 @@
 package com.wheel.rpc.container;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.wheel.rpc.core.config.bean.RegistryConfigBean;
 import com.wheel.rpc.core.config.bean.ServiceConfigBean;
@@ -17,8 +23,21 @@ import com.wheel.rpc.core.test.impl.HelloImpl;
  */
 public class RpcServerStarter {
     
+    public static final Logger LOG = LoggerFactory.getLogger(RpcServerStarter.class);
     
     public static void main(String[] args) {
+        InputStream is = RpcServerStarter.class.getClassLoader().getResourceAsStream("server.properties");
+        Properties prop = new Properties();
+        try {
+            prop.load(is);
+        } catch (IOException e) {
+            LOG.error("", e);
+            System.exit(-1);
+        }
+        
+        int port = Integer.parseInt(prop.getProperty("server.rpc.port"));
+        int workerCnt = Integer.parseInt(prop.getProperty("server.rpc.netty.thread.worker"));
+        int bossCnt = Integer.parseInt(prop.getProperty("server.rpc.netty.thread.boss"));
         
         RegistryConfigBean registryConfigBean = new RegistryConfigBean();
         registryConfigBean.setProtocol("zookeeper");
@@ -30,7 +49,7 @@ public class RpcServerStarter {
         List<ServiceConfigBean<?>> servicesArgs = new ArrayList<>();
         servicesArgs.add(serviceConfigBean);
         
-        RpcServer rpcServer = new RpcServer(8888, 20, 1, servicesArgs);
+        RpcServer rpcServer = new RpcServer(port, workerCnt, bossCnt, servicesArgs);
         rpcServer.setRegistryConfigBean(registryConfigBean);
         rpcServer.init();
         rpcServer.open();

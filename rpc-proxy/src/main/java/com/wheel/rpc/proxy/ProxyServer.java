@@ -1,6 +1,5 @@
 package com.wheel.rpc.proxy;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,7 +11,6 @@ import com.wheel.rpc.communication.server.impl.netty.NettyRemotingServer;
 import com.wheel.rpc.core.config.bean.RegistryConfigBean;
 import com.wheel.rpc.core.exception.RpcException;
 import com.wheel.rpc.core.model.ServiceProviderNode;
-import com.wheel.rpc.core.test.IHello;
 import com.wheel.rpc.proxy.common.ProxyServiceCache;
 import com.wheel.rpc.proxy.handler.client.ProxyAsClientHandler;
 import com.wheel.rpc.proxy.handler.server.ProxyAsServerChildHandler;
@@ -58,14 +56,10 @@ public class ProxyServer {
     /**
      * 启动前的初始化
      */
-    private void init() {
+    public void init(int proxy2ServerWorkerCnt) {
         check();
         registry = RegistryFactory.createRegistry(registryConfigBean);
         ProxyServiceCache.init(proxyServices, registry);
-        
-        //TODO proxy处理服务提供者的IO操作的线程数
-        int ioThreadCnt = 5;
-        
         ConcurrentHashMap<String, List<ServiceProviderNode>> servicesProviders = ProxyServiceCache.allServicesProviders();
         //初始化与各个服务的提供者的连接
         for (Map.Entry<String, List<ServiceProviderNode>> entry : servicesProviders.entrySet()) {
@@ -74,7 +68,7 @@ public class ProxyServer {
             ConcurrentHashMap<ServiceProviderNode, NettyRemotingClient> proxyClients = new ConcurrentHashMap<>();
             for (ServiceProviderNode serviceProviderNode : providerNodes) {
                 //创建Proxy与服务提供者的连接
-                NettyRemotingClient nettyRemotingClient = createRemotingClient(serviceProviderNode, ioThreadCnt);
+                NettyRemotingClient nettyRemotingClient = createRemotingClient(serviceProviderNode, proxy2ServerWorkerCnt);
                 proxyClients.put(serviceProviderNode, nettyRemotingClient);
             }
             
@@ -100,7 +94,7 @@ public class ProxyServer {
     
     
     /**
-     * 
+     * check
      */
     private void check() {
         if(null == registryConfigBean) {
@@ -115,33 +109,12 @@ public class ProxyServer {
     /**
      * 初始化代理的服务
      */
-    private Thread startProxyServer() {
+    public Thread startProxyServer() {
         NettyRemotingServer proxyServer = new NettyRemotingServer(serverWorkerThreadCount, serverBossThreadCount, serverPort);
         proxyServer.setChildChannelInitializer(new ProxyAsServerChildHandler());
         proxyServer.init();
         Thread waitCloseThread = proxyServer.open();
         proxyServer.waitForDown();
         return waitCloseThread;
-    }
-    
-    public static void main(String[] args) {
-        List<Class<?>> proxyServicesArgs = new ArrayList<>();
-        proxyServicesArgs.add(IHello.class);
-        
-        //配置中心信息
-        RegistryConfigBean registryConfigBean = new RegistryConfigBean();
-        registryConfigBean.setProtocol("zookeeper");
-        registryConfigBean.setConnection("192.168.56.101:2181");
-        
-        ProxyServer proxyServer = new ProxyServer(10, 1, 8889, proxyServicesArgs);
-        proxyServer.setRegistryConfigBean(registryConfigBean);
-        proxyServer.init();
-        
-        Thread startProxyServerThread = proxyServer.startProxyServer();
-        try {
-            startProxyServerThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 }
