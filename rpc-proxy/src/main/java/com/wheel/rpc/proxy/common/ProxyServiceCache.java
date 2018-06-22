@@ -3,9 +3,11 @@ package com.wheel.rpc.proxy.common;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.wheel.rpc.cache.RegistryCache;
 import com.wheel.rpc.communication.client.impl.netty.NettyRemotingClient;
 import com.wheel.rpc.core.model.ServiceProviderNode;
-import com.wheel.rpc.registry.IRegistry;
+import com.wheel.rpc.proxy.service.governance.loadbalance.ILoadbalance;
+import com.wheel.rpc.proxy.service.governance.loadbalance.LoadbalanceFactory;
 
 /**
  * 当前proxy代理的服务的缓存
@@ -19,40 +21,49 @@ public class ProxyServiceCache {
     /** 该Proxy负责的服务列表 */
     private static List<Class<?>> proxyServices;
     
-    /** 服务名称 - 服务的Provider的集合 */
-    private static final ConcurrentHashMap<String, List<ServiceProviderNode>> SERVICES_PROVIDERS = new ConcurrentHashMap<>(); 
-    
     /** Proxy与各个服务提供者的结点的保持的长连接 */
     private static final ConcurrentHashMap<String, ConcurrentHashMap<ServiceProviderNode, NettyRemotingClient>> SERVICES_NODES_REMOTINGCLIENTS = new ConcurrentHashMap<>();
+    
+    /** service对应的负载均衡器 */ 
+    private static final ConcurrentHashMap<String, ILoadbalance> SERVICES_LOADBALANCE_STRATEGY = new ConcurrentHashMap<>();
     
     /**
      * 
      * @param proxyServicesArgs
      * @param registry
      */
-    public static void init(List<Class<?>> proxyServicesArgs, IRegistry registry) {
+    public static void init(List<Class<?>> proxyServicesArgs) {
         proxyServices = proxyServicesArgs;
-        for (Class<?> clazz : proxyServices) {
-            List<ServiceProviderNode> allOnlineNodes = registry.serviceOnlineNodes(clazz.getName());
-            SERVICES_PROVIDERS.put(clazz.getName(), allOnlineNodes);
+        for (Class<?> serviceClazz : proxyServices) {
+            String serviceName = serviceClazz.getName();
+            initLoadbalanceStrategy(serviceName);
         }
     }
     
     /**
-     * 通过服务的名称获取服务所有的Provider
+     * 初始化负载均衡策略
      * @param serviceName
-     * @return
      */
-    public static List<ServiceProviderNode> getServicesProviders(String serviceName) {
-        return SERVICES_PROVIDERS.get(serviceName);
+    public static void initLoadbalanceStrategy(String serviceName) {
+        ILoadbalance loadbalance = LoadbalanceFactory.createLoadbalance(serviceName);
+        //ILoadbalance监听配置中心的变化
+        
+        //TODO
+        RegistryCache.addListener(loadbalance);
+        SERVICES_LOADBALANCE_STRATEGY.put(serviceName, loadbalance);
     }
     
     /**
-     * 获取当前Proxy的所有的服务以及其服务的Provider
-     * @return
+     * 更新新的负载均衡策略
+     * @param serviceName
      */
-    public static ConcurrentHashMap<String, List<ServiceProviderNode>> allServicesProviders() {
-        return SERVICES_PROVIDERS;
+    public static void updateLoadbalanceStrategy(String serviceName) {
+        ILoadbalance newLoadbalance = LoadbalanceFactory.createLoadbalance(serviceName);
+        //Registry中的listener
+        ILoadbalance oldLoadbalance = SERVICES_LOADBALANCE_STRATEGY.get(serviceName);
+        RegistryCache.removeListener(oldLoadbalance);
+        RegistryCache.addListener(newLoadbalance);
+        SERVICES_LOADBALANCE_STRATEGY.put(serviceName, newLoadbalance);
     }
     
     /**
@@ -77,5 +88,14 @@ public class ProxyServiceCache {
         }
         
         return null;
+    }
+    
+    /**
+     * 获取服务的负载均衡器
+     * @param serviceName
+     * @return
+     */
+    public static ILoadbalance servicesLoadbalanceStrategy(String serviceName) {
+        return SERVICES_LOADBALANCE_STRATEGY.get(serviceName);
     }
 }

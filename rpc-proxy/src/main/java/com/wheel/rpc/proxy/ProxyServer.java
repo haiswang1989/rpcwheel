@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.collections.CollectionUtils;
 
+import com.wheel.rpc.cache.RegistryCache;
 import com.wheel.rpc.communication.client.impl.netty.NettyRemotingClient;
 import com.wheel.rpc.communication.server.impl.netty.NettyRemotingServer;
 import com.wheel.rpc.core.config.bean.RegistryConfigBean;
@@ -14,8 +15,6 @@ import com.wheel.rpc.core.model.ServiceProviderNode;
 import com.wheel.rpc.proxy.common.ProxyServiceCache;
 import com.wheel.rpc.proxy.handler.client.ProxyAsClientHandler;
 import com.wheel.rpc.proxy.handler.server.ProxyAsServerChildHandler;
-import com.wheel.rpc.registry.IRegistry;
-import com.wheel.rpc.registry.RegistryFactory;
 
 import lombok.Setter;
 
@@ -39,9 +38,6 @@ public class ProxyServer {
     /** 当前proxy代理的服务列表 */
     private List<Class<?>> proxyServices;
     
-    /** 注册中心 */
-    private IRegistry registry;
-    
     /** 注册中心的config信息 */
     @Setter
     private RegistryConfigBean registryConfigBean;
@@ -58,9 +54,7 @@ public class ProxyServer {
      */
     public void init(int proxy2ServerWorkerCnt) {
         check();
-        registry = RegistryFactory.createRegistry(registryConfigBean);
-        ProxyServiceCache.init(proxyServices, registry);
-        ConcurrentHashMap<String, List<ServiceProviderNode>> servicesProviders = ProxyServiceCache.allServicesProviders();
+        ConcurrentHashMap<String, List<ServiceProviderNode>> servicesProviders = RegistryCache.allServicesProviders();
         //初始化与各个服务的提供者的连接
         for (Map.Entry<String, List<ServiceProviderNode>> entry : servicesProviders.entrySet()) {
             String serviceName = entry.getKey();

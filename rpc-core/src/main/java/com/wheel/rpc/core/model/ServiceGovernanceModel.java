@@ -23,26 +23,23 @@ public class ServiceGovernanceModel {
     
     /** 方法的超时 */
     /** method / 超时阈值 */
-    private Map<String, Long> methodsTimeout;
+    private Map<String, Long> methodsTimeout = new HashMap<>();
     
     /** 负载均衡策略 - proxy */
-    private Loadbalance loadbalance;
+    private LoadBalance loadbalance = LoadBalance.RANDOM;
     
     /** 是否降级 - server */
-    public boolean isDegradation;
+    public boolean isDegradation = false;
     
     /** 方法的限流 - server */
     /** method / 每秒调用阈值 */
-    private Map<String, Integer> methodsRateLimiter;
+    private Map<String, Integer> methodsRateLimiter = new HashMap<>();
     
     /** 熔断策略 - proxy*/
-    private CircuitBreakerModel circuitBreakerModel;
+    private CircuitBreakerModel circuitBreakerModel = new CircuitBreakerModel(false);
     
     /** 结点的权重 - proxy*/
     private Map<ServiceProviderNode, Integer> nodesWeight = new HashMap<>();
-    
-    /** 结点的权重值是否相等 */
-    //private boolean sameWeight;
     
     public ServiceGovernanceModel() {
     }

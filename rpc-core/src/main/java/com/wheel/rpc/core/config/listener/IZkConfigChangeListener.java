@@ -7,8 +7,8 @@ package com.wheel.rpc.core.config.listener;
  * @author hansen.wang
  * @date 2018年6月13日 上午9:50:49
  */
-public interface IZkConfigListener {
+public interface IZkConfigChangeListener {
     
-    public void doNotify();
+    public void doNotify(String serviceName);
     
 }

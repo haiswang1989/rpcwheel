@@ -32,8 +32,22 @@ public class ZookeeperRegistry extends AbstractRegistry {
     /** 与注册中心的连接 */
     private ZkClient zkClient;
     
-    public ZookeeperRegistry(RegistryConfigBean registryConfigBean) {
+    private static volatile ZookeeperRegistry INSTANCE;
+    
+    private ZookeeperRegistry(RegistryConfigBean registryConfigBean) {
         this.zkClient = new ZkClient(registryConfigBean.getConnection());
+    }
+    
+    public static ZookeeperRegistry getInstance(RegistryConfigBean registryConfigBean) {
+        if(null==INSTANCE) {
+            synchronized(ZookeeperRegistry.class) {
+                if(null==INSTANCE) {
+                    INSTANCE = new ZookeeperRegistry(registryConfigBean);
+                }
+            }
+        }
+        
+        return INSTANCE;
     }
     
     @Override
@@ -147,7 +161,7 @@ public class ZookeeperRegistry extends AbstractRegistry {
         String servicePath = CommonUtils.getServicePath(serviceName);
         String json = zkClient.readData(servicePath, true);
         if(null == json) {
-            return null;
+            return new ServiceGovernanceModel();
         }
         
         return JSONObject.parseObject(json, ServiceGovernanceModel.class);

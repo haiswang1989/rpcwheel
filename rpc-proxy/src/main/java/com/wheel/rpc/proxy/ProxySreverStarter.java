@@ -9,8 +9,12 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.wheel.rpc.cache.RegistryCache;
 import com.wheel.rpc.core.config.bean.RegistryConfigBean;
 import com.wheel.rpc.core.test.IHello;
+import com.wheel.rpc.proxy.common.ProxyServiceCache;
+import com.wheel.rpc.registry.IRegistry;
+import com.wheel.rpc.registry.RegistryFactory;
 
 /**
  * 
@@ -51,15 +55,24 @@ public class ProxySreverStarter {
         }
         
         
-        List<Class<?>> proxyServicesArgs = new ArrayList<>();
-        proxyServicesArgs.add(IHello.class);
+        List<Class<?>> proxyServices = new ArrayList<>();
+        proxyServices.add(IHello.class);
         
         //配置中心信息
         RegistryConfigBean registryConfigBean = new RegistryConfigBean();
         registryConfigBean.setProtocol("zookeeper");
         registryConfigBean.setConnection("192.168.56.101:2181");
         
-        ProxyServer proxyServer = new ProxyServer(workerCnt, bossCnt, port, proxyServicesArgs);
+        //构造registry
+        IRegistry registry = RegistryFactory.createRegistry(registryConfigBean);
+        //配置中心的缓存的初始化
+        RegistryCache.setRegistry(registry);
+        RegistryCache.init(proxyServices);
+        
+        //proxy端 service相关的初始化
+        ProxyServiceCache.init(proxyServices);
+        
+        ProxyServer proxyServer = new ProxyServer(workerCnt, bossCnt, port, proxyServices);
         proxyServer.setRegistryConfigBean(registryConfigBean);
         proxyServer.init(proxy2ServerWorkerCnt);
         proxyServer.startProxyServer();

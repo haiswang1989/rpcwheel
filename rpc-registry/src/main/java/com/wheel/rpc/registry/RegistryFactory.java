@@ -23,7 +23,7 @@ public class RegistryFactory {
     public static IRegistry createRegistry(RegistryConfigBean registryConfigBean) {
         String registryProtocol = registryConfigBean.getProtocol();
         if(PROTOCAL_ZOOKEEPER.equals(registryProtocol)) {
-            return new ZookeeperRegistry(registryConfigBean);
+            return ZookeeperRegistry.getInstance(registryConfigBean);
         } else {
             return null;
         }

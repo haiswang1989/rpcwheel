@@ -1,12 +1,8 @@
 package com.wheel.rpc.proxy.handler.server;
 
-import java.util.List;
-
 import com.wheel.rpc.core.model.RpcRequest;
-import com.wheel.rpc.core.model.ServiceProviderNode;
 import com.wheel.rpc.proxy.common.ProxyServiceCache;
 import com.wheel.rpc.proxy.service.governance.loadbalance.ILoadbalance;
-import com.wheel.rpc.proxy.service.governance.loadbalance.impl.RandomLoadbalance;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -23,29 +19,12 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
  */
 public class LoadbalanceHandler extends ChannelInboundHandlerAdapter {
     
-    /** 负载均衡器 */ 
-    private ILoadbalance loadbalance;
-    
-    public LoadbalanceHandler() {
-        loadbalance = new RandomLoadbalance("");
-    }
-    
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         RpcRequest request = (RpcRequest)msg;
         String serviceName = request.getServiceName();
-        List<ServiceProviderNode> providerNodes = ProxyServiceCache.getServicesProviders(serviceName);
-        
-        //TODO 
-        //这边需要使用负载均衡算法,获取指定的ProviderNode
-        request.setProvider(providerNodes.get(0));
+        ILoadbalance loadbalance = ProxyServiceCache.servicesLoadbalanceStrategy(serviceName);
+        request.setProvider(loadbalance.next());
         ctx.fireChannelRead(msg);
-        
-        //目标服务器
-        /*
-        ServiceProviderNode targetProvider = loadbalance.next();
-        request.setProvider(targetProvider);
-        ctx.write(request, promise);
-        */
     }
 }
