@@ -1,6 +1,5 @@
 package com.wheel.rpc.proxy.service.governance.loadbalance.impl;
 
-import com.wheel.rpc.core.model.RefreshCallMethod;
 import com.wheel.rpc.core.model.ServiceProviderNode;
 
 /**
@@ -19,13 +18,7 @@ public class LeastLoadLoadbalance extends AbstractLoadbalance {
     
     @Override
     public ServiceProviderNode next() {
-        // TODO Auto-generated method stub
         return null;
-    }
-    
-    @Override
-    public void refresh(RefreshCallMethod callMethod) {
-        
     }
 
 }

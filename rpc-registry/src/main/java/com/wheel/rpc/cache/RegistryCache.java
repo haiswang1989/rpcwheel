@@ -3,7 +3,7 @@ package com.wheel.rpc.cache;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import com.wheel.rpc.core.config.listener.IZkConfigChangeListener;
 import com.wheel.rpc.core.exception.RpcException;
@@ -34,8 +34,8 @@ public class RegistryCache {
     @Setter
     private static IRegistry registry;
     
-    /** 对ZK配置变化 感兴趣的listener */
-    private static ConcurrentSkipListSet<IZkConfigChangeListener> listeners = new ConcurrentSkipListSet<>();
+    /**对ZK配置变化 感兴趣的listener  serviceName和listener的映射 */
+    private static ConcurrentHashMap<String, CopyOnWriteArraySet<IZkConfigChangeListener>> service2Listeners = new ConcurrentHashMap<>();
     
     /**
      * 初始化服务配置
@@ -83,8 +83,11 @@ public class RegistryCache {
             //结点发生了变化,需要通知
             //更新缓存
             SERVICES_PROVIDERS.put(serviceName, newOnlineNodes);
-            for (IZkConfigChangeListener listener : listeners) {
-                listener.doNotify(serviceName);
+            CopyOnWriteArraySet<IZkConfigChangeListener> listeners = service2Listeners.get(serviceName);
+            if(null!=listeners) {
+                for (IZkConfigChangeListener listener : listeners) {
+                    listener.onlineNodesChange(newOnlineNodesCopy, currentOnlineNodesCopy);
+                }
             }
         } 
     }
@@ -95,12 +98,15 @@ public class RegistryCache {
      * @param serviceGovernanceModel
      */
     public static void serviceParamUpdate(String serviceName, ServiceGovernanceModel serviceGovernanceModel) {
+        ServiceGovernanceModel oldServiceGovernanceModel = SERVICES_GOVERNANCE_STRATEGY.get(serviceName);
         //更新缓存
         SERVICES_GOVERNANCE_STRATEGY.put(serviceName, serviceGovernanceModel);
-        for (IZkConfigChangeListener listener : listeners) {
-            listener.doNotify(serviceName);
+        CopyOnWriteArraySet<IZkConfigChangeListener> listeners = service2Listeners.get(serviceName);
+        if(null!=listeners) {
+            for (IZkConfigChangeListener listener : listeners) {
+                listener.onGovernanceChange(oldServiceGovernanceModel, serviceGovernanceModel);
+            }
         }
-        
     }
     
     /**
@@ -141,28 +147,30 @@ public class RegistryCache {
         return SERVICES_PROVIDERS;
     }
     
-    
     /**
-     * 添加listener
-     * @param needAddListeners
-     */
-    public static void addListeners(List<IZkConfigChangeListener> needAddListeners) {
-        listeners.addAll(needAddListeners);
-    }
-    
-    /**
-     * 添加listener
+     * 添加service的listener
+     * @param serviceName
      * @param needAddListener
      */
-    public static void addListener(IZkConfigChangeListener needAddListener) {
+    public static void addListener(String serviceName, IZkConfigChangeListener needAddListener) {
+        CopyOnWriteArraySet<IZkConfigChangeListener> listeners = service2Listeners.get(serviceName);
+        if(null == listeners) {
+            listeners = new CopyOnWriteArraySet<>();
+            service2Listeners.put(serviceName, listeners);
+        }
+        
         listeners.add(needAddListener);
     }
     
     /**
-     * 
+     * 删除service的listener
+     * @param serviceName
      * @param needRemoveListener
      */
-    public static void removeListener(IZkConfigChangeListener needRemoveListener) {
-        listeners.remove(needRemoveListener);
+    public static void removeListener(String serviceName, IZkConfigChangeListener needRemoveListener) {
+        CopyOnWriteArraySet<IZkConfigChangeListener> listeners = service2Listeners.get(serviceName);
+        if(null!=listeners) {
+            listeners.remove(needRemoveListener);
+        }
     }
 }

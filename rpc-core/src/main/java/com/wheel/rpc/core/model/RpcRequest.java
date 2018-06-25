@@ -3,6 +3,8 @@ package com.wheel.rpc.core.model;
 import java.util.List;
 import java.util.UUID;
 
+import com.wheel.rpc.core.service.governance.ILoadbalance;
+
 import lombok.Data;
 
 /**
@@ -40,8 +42,8 @@ public class RpcRequest {
     /** 经过路由之后,可选的提供者 */
     private List<ServiceProviderNode> afterRouterNodes;
     
-    /** 经过Loadbanlance选择后,最终请求的服务结点 */
-    private ServiceProviderNode provider;
+    /** 负载均衡的实现 */
+    private ILoadbalance loadbalance;
     
     /**
      * 裁剪请求参数,减小带宽
@@ -49,6 +51,6 @@ public class RpcRequest {
     public void cut() {
         allNodes = null;
         afterRouterNodes = null;
-        provider = null;
+        loadbalance = null;
     }
 }

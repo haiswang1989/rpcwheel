@@ -48,7 +48,9 @@ public class DecodeHandler extends LengthFieldBasedFrameDecoder {
         Object obj = null;
         try {
             obj = decode(ctx, in);
-            out.add(obj);
+            if(null!=obj) {
+                out.add(obj);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

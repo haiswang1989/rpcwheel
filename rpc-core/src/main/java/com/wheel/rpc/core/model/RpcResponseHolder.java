@@ -16,19 +16,17 @@ public class RpcResponseHolder {
         obj = new Object();
     }
     
-    /**
-     * 
-     * @return
-     */
-    public RpcResponse get() {
+    public RpcResponse get(long timeout) {
         if(null == rpcResponse) {
             synchronized (obj) {
                 while(true) {
                     if(null==rpcResponse) {
                         try {
-                            obj.wait();
+                            obj.wait(timeout);
                         } catch (InterruptedException e) {
+                            continue;
                         }
+                        break;
                     } else {
                         break;
                     }

@@ -1,7 +1,6 @@
-package com.wheel.rpc.proxy.service.governance.loadbalance;
+package com.wheel.rpc.core.service.governance;
 
-import com.wheel.rpc.core.config.listener.IZkConfigChangeListener;
-import com.wheel.rpc.core.model.RefreshCallMethod;
+import com.wheel.rpc.core.model.ServiceGovernanceModel;
 import com.wheel.rpc.core.model.ServiceProviderNode;
 
 /**
@@ -12,7 +11,7 @@ import com.wheel.rpc.core.model.ServiceProviderNode;
  * @author hansen.wang
  * @date 2018年6月7日 下午4:24:46
  */
-public interface ILoadbalance extends IZkConfigChangeListener {
+public interface ILoadbalance {
     
     /**
      * 获取调用结点
@@ -23,6 +22,6 @@ public interface ILoadbalance extends IZkConfigChangeListener {
     /**
      * 刷新
      */
-    public void refresh(RefreshCallMethod callMethod);
+    public void refresh(ServiceGovernanceModel oldServiceGovernanceModel, ServiceGovernanceModel newServiceGovernanceModel);
     
 }

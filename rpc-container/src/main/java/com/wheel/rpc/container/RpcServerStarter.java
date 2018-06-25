@@ -9,6 +9,7 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.wheel.rpc.container.common.ServerConstants;
 import com.wheel.rpc.core.config.bean.RegistryConfigBean;
 import com.wheel.rpc.core.config.bean.ServiceConfigBean;
 import com.wheel.rpc.core.test.IHello;
@@ -36,9 +37,9 @@ public class RpcServerStarter {
         try {
             is = RpcServerStarter.class.getClassLoader().getResourceAsStream("server.properties");
             prop.load(is);
-            port = Integer.parseInt(prop.getProperty("server.rpc.port"));
-            workerCnt = Integer.parseInt(prop.getProperty("server.rpc.netty.thread.worker"));
-            bossCnt = Integer.parseInt(prop.getProperty("server.rpc.netty.thread.boss"));
+            port = Integer.parseInt(prop.getProperty(ServerConstants.SERVER_RPC_PORT));
+            workerCnt = Integer.parseInt(prop.getProperty(ServerConstants.SERVER_RPC_NETTY_THREAD_WORKER));
+            bossCnt = Integer.parseInt(prop.getProperty(ServerConstants.SERVER_RPC_NETTY_THREAD_BOSS));
         } catch (IOException e) {
             LOG.error("", e);
             System.exit(-1);

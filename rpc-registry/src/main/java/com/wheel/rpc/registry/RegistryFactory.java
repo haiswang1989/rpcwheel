@@ -1,5 +1,6 @@
 package com.wheel.rpc.registry;
 
+import com.wheel.rpc.common.RegistryConstants;
 import com.wheel.rpc.core.config.bean.RegistryConfigBean;
 import com.wheel.rpc.registry.impl.zookeeper.ZookeeperRegistry;
 
@@ -12,9 +13,6 @@ import com.wheel.rpc.registry.impl.zookeeper.ZookeeperRegistry;
  */
 public class RegistryFactory {
     
-    /** registry的协议 zookeeper */
-    private static String PROTOCAL_ZOOKEEPER = "zookeeper";
-    
     /**
      * 
      * @param registryConfigBean
@@ -22,7 +20,7 @@ public class RegistryFactory {
      */
     public static IRegistry createRegistry(RegistryConfigBean registryConfigBean) {
         String registryProtocol = registryConfigBean.getProtocol();
-        if(PROTOCAL_ZOOKEEPER.equals(registryProtocol)) {
+        if(RegistryConstants.PROTOCAL_ZOOKEEPER.equals(registryProtocol)) {
             return ZookeeperRegistry.getInstance(registryConfigBean);
         } else {
             return null;

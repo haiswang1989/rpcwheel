@@ -1,8 +1,8 @@
 package com.wheel.rpc.proxy.handler.server;
 
 import com.wheel.rpc.core.model.RpcRequest;
+import com.wheel.rpc.core.service.governance.ILoadbalance;
 import com.wheel.rpc.proxy.common.ProxyServiceCache;
-import com.wheel.rpc.proxy.service.governance.loadbalance.ILoadbalance;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -24,7 +24,7 @@ public class LoadbalanceHandler extends ChannelInboundHandlerAdapter {
         RpcRequest request = (RpcRequest)msg;
         String serviceName = request.getServiceName();
         ILoadbalance loadbalance = ProxyServiceCache.servicesLoadbalanceStrategy(serviceName);
-        request.setProvider(loadbalance.next());
+        request.setLoadbalance(loadbalance);
         ctx.fireChannelRead(msg);
     }
 }

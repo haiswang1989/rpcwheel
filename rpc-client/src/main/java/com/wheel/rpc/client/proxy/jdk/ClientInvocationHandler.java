@@ -3,8 +3,12 @@ package com.wheel.rpc.client.proxy.jdk;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.wheel.rpc.client.invoke.RequestProcesser;
 import com.wheel.rpc.communication.channel.IRpcWriteChannel;
+import com.wheel.rpc.core.exception.RpcException;
 import com.wheel.rpc.core.model.RpcRequest;
 import com.wheel.rpc.core.model.RpcResponse;
 import com.wheel.rpc.core.model.RpcStatus;
@@ -16,6 +20,8 @@ import com.wheel.rpc.core.model.RpcStatus;
  * @date 2018年6月14日 上午10:33:51
  */
 public class ClientInvocationHandler implements InvocationHandler {
+    
+    public static final Logger LOG = LoggerFactory.getLogger(ClientInvocationHandler.class);
     
     private IRpcWriteChannel rpcWriteChannel;
     
@@ -39,6 +45,12 @@ public class ClientInvocationHandler implements InvocationHandler {
         rpcRequest.setParamsValue(args);
         RequestProcesser processer = new RequestProcesser(rpcWriteChannel, rpcRequest);
         RpcResponse rpcResponse = processer.doInvoke();
+        if(null == rpcResponse) {
+            String errMsg = String.format("Call proxy timeout ,serviceName %s", className);
+            LOG.error(errMsg);
+            throw new RpcException(errMsg);
+        }
+        
         RpcStatus status = rpcResponse.getStatus();
         if(RpcStatus.SUCCESS.equals(status)) {
             return rpcResponse.getObj();

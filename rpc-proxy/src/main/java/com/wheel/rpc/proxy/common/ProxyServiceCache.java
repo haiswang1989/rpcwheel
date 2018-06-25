@@ -6,7 +6,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.wheel.rpc.cache.RegistryCache;
 import com.wheel.rpc.communication.client.impl.netty.NettyRemotingClient;
 import com.wheel.rpc.core.model.ServiceProviderNode;
-import com.wheel.rpc.proxy.service.governance.loadbalance.ILoadbalance;
+import com.wheel.rpc.core.service.governance.ILoadbalance;
+import com.wheel.rpc.proxy.listener.OnlineNodesChangeListener;
+import com.wheel.rpc.proxy.listener.ServiceGovernChangeListener;
 import com.wheel.rpc.proxy.service.governance.loadbalance.LoadbalanceFactory;
 
 /**
@@ -47,9 +49,8 @@ public class ProxyServiceCache {
     public static void initLoadbalanceStrategy(String serviceName) {
         ILoadbalance loadbalance = LoadbalanceFactory.createLoadbalance(serviceName);
         //ILoadbalance监听配置中心的变化
-        
-        //TODO
-        RegistryCache.addListener(loadbalance);
+        RegistryCache.addListener(serviceName, new OnlineNodesChangeListener(serviceName));
+        RegistryCache.addListener(serviceName, new ServiceGovernChangeListener(serviceName));
         SERVICES_LOADBALANCE_STRATEGY.put(serviceName, loadbalance);
     }
     
@@ -60,9 +61,6 @@ public class ProxyServiceCache {
     public static void updateLoadbalanceStrategy(String serviceName) {
         ILoadbalance newLoadbalance = LoadbalanceFactory.createLoadbalance(serviceName);
         //Registry中的listener
-        ILoadbalance oldLoadbalance = SERVICES_LOADBALANCE_STRATEGY.get(serviceName);
-        RegistryCache.removeListener(oldLoadbalance);
-        RegistryCache.addListener(newLoadbalance);
         SERVICES_LOADBALANCE_STRATEGY.put(serviceName, newLoadbalance);
     }
     
@@ -88,6 +86,21 @@ public class ProxyServiceCache {
         }
         
         return null;
+    }
+    
+    /**
+     * 获取服务,所有在线结点的连接信息
+     * @param serviceName
+     * @return
+     */
+    public static ConcurrentHashMap<ServiceProviderNode, NettyRemotingClient> getAllRemotingClients(String serviceName) {
+        ConcurrentHashMap<ServiceProviderNode, NettyRemotingClient> allRomtingClients = SERVICES_NODES_REMOTINGCLIENTS.get(serviceName);
+        if(null == allRomtingClients) {
+            allRomtingClients = new ConcurrentHashMap<>();
+            SERVICES_NODES_REMOTINGCLIENTS.put(serviceName, allRomtingClients);
+        }
+        
+        return allRomtingClients;
     }
     
     /**

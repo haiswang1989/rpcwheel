@@ -1,11 +1,9 @@
 package com.wheel.rpc.proxy.service.governance.loadbalance.impl;
 
 
-import com.wheel.rpc.cache.RegistryCache;
-import com.wheel.rpc.core.model.LoadBalance;
-import com.wheel.rpc.core.model.RefreshCallMethod;
 import com.wheel.rpc.core.model.ServiceGovernanceModel;
-import com.wheel.rpc.proxy.service.governance.loadbalance.ILoadbalance;
+import com.wheel.rpc.core.model.ServiceProviderNode;
+import com.wheel.rpc.core.service.governance.ILoadbalance;
 
 /**
  * 默认的负载均衡的实现
@@ -22,20 +20,14 @@ public abstract class AbstractLoadbalance implements ILoadbalance {
         this.serviceName = serviceNameArgs;
     }
     
-    /**
-     * 负载均衡的策略是否发生变化
-     * @param localLoadBalanceStrategy
-     * @return
-     */
-    protected boolean isLoadbanlanceStrategyChange(LoadBalance localLoadBalanceStrategy) {
-        //该服务的治理参数信息
-        ServiceGovernanceModel serviceGovernance = RegistryCache.getServiceGovernance(serviceName);
-        LoadBalance newLoadBalanceStrategy = serviceGovernance.getLoadbalance();
-        return !(localLoadBalanceStrategy.equals(newLoadBalanceStrategy));
+    @Override
+    public ServiceProviderNode next() {
+        return null;
     }
     
     @Override
-    public void doNotify(String serviceName) {
-        refresh(RefreshCallMethod.NORMAL);
+    public void refresh(ServiceGovernanceModel oldServiceGovernanceModel,
+            ServiceGovernanceModel newServiceGovernanceModel) {
+        
     }
 }

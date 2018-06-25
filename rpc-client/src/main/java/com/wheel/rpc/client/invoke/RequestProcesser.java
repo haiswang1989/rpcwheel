@@ -31,6 +31,6 @@ public class RequestProcesser {
         RpcResponseHolder rpcResponseHolder = new RpcResponseHolder();
         ResponseHolderCache.put(requestId, rpcResponseHolder);
         rpcWriteChannel.writeAndFlush(rpcRequest);
-        return rpcResponseHolder.get();
+        return rpcResponseHolder.get(5000l);
     }
 }

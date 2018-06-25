@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.wheel.rpc.cache.RegistryCache;
 import com.wheel.rpc.core.config.bean.RegistryConfigBean;
 import com.wheel.rpc.core.test.IHello;
+import com.wheel.rpc.proxy.common.ProxyConstants;
 import com.wheel.rpc.proxy.common.ProxyServiceCache;
 import com.wheel.rpc.registry.IRegistry;
 import com.wheel.rpc.registry.RegistryFactory;
@@ -22,9 +23,9 @@ import com.wheel.rpc.registry.RegistryFactory;
  * @author hansen.wang
  * @date 2018年6月21日 上午11:36:25
  */
-public class ProxySreverStarter {
+public class ProxyServerStarter {
     
-    public static final Logger LOG = LoggerFactory.getLogger(ProxySreverStarter.class);
+    public static final Logger LOG = LoggerFactory.getLogger(ProxyServerStarter.class);
     
     public static void main(String[] args) {
         
@@ -38,10 +39,12 @@ public class ProxySreverStarter {
         try {
             is = ProxyServer.class.getClassLoader().getResourceAsStream("proxy.properties");
             prop.load(is);
-            port = Integer.parseInt(prop.getProperty("proxy.rpc.port"));
-            workerCnt = Integer.parseInt(prop.getProperty("proxy.rpc.netty.thread.worker"));
-            bossCnt = Integer.parseInt(prop.getProperty("proxy.rpc.netty.thread.boss"));
-            proxy2ServerWorkerCnt = Integer.parseInt(prop.getProperty("proxy2server.rpc.netty.thread.worker"));
+            port = Integer.parseInt(prop.getProperty(ProxyConstants.PROXY_RPC_PORT));
+            workerCnt = Integer.parseInt(prop.getProperty(ProxyConstants.PROXY_RPC_NETTY_THREAD_WORKER));
+            bossCnt = Integer.parseInt(prop.getProperty(ProxyConstants.PROXY_RPC_NETTY_THREAD_BOSS));
+            String proxy2ServerWorkerCount = prop.getProperty(ProxyConstants.PROXY2SERVER_RPC_NETTY_THREAD_WORKER);
+            System.setProperty(ProxyConstants.PROXY2SERVER_RPC_NETTY_THREAD_WORKER, proxy2ServerWorkerCount);
+            proxy2ServerWorkerCnt = Integer.parseInt(proxy2ServerWorkerCount);
         } catch (IOException e1) {
             LOG.error("", e1);
             System.exit(-1);
@@ -53,6 +56,7 @@ public class ProxySreverStarter {
                 }
             }
         }
+        
         
         
         List<Class<?>> proxyServices = new ArrayList<>();
@@ -76,6 +80,7 @@ public class ProxySreverStarter {
         proxyServer.setRegistryConfigBean(registryConfigBean);
         proxyServer.init(proxy2ServerWorkerCnt);
         proxyServer.startProxyServer();
+        proxyServer.subscribe();
     }
-
+    
 }

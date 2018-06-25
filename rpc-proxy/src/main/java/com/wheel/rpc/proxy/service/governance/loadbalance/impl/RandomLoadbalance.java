@@ -5,8 +5,6 @@ import java.util.Map;
 import java.util.Random;
 
 import com.wheel.rpc.cache.RegistryCache;
-import com.wheel.rpc.core.model.LoadBalance;
-import com.wheel.rpc.core.model.RefreshCallMethod;
 import com.wheel.rpc.core.model.ServiceGovernanceModel;
 import com.wheel.rpc.core.model.ServiceProviderNode;
 import com.wheel.rpc.proxy.common.ProxyServiceCache;
@@ -22,9 +20,6 @@ import com.wheel.rpc.proxy.common.ProxyServiceCache;
  */
 public class RandomLoadbalance extends AbstractLoadbalance {
     
-    /** 负载均衡策略 */
-    private LoadBalance randomLoadBalanceStrategy = LoadBalance.RANDOM;
-    
     /** 生成随机数 */
     private Random random;
     
@@ -37,27 +32,43 @@ public class RandomLoadbalance extends AbstractLoadbalance {
     public RandomLoadbalance(String serviceNameArgs) {
         super(serviceNameArgs);
         this.random = new Random();
-        refresh(RefreshCallMethod.CONSTRUCTOR);
+        create(RegistryCache.getServiceGovernance(serviceName));
     }
     
     @Override
     public ServiceProviderNode next() {
+        if(0 == length) {
+            return null;
+        }
+        
         return providersArray[random.nextInt(length)];
     }
     
     @Override
-    public synchronized void refresh(RefreshCallMethod callMethod) {
-        ServiceGovernanceModel serviceGovernance = RegistryCache.getServiceGovernance(serviceName);
-        boolean isChange = isLoadbanlanceStrategyChange(randomLoadBalanceStrategy);
-        if(RefreshCallMethod.NORMAL.equals(callMethod) && isChange) { //如果负载均衡策略发生变化,直接更新负载均衡策略,然后退出
+    public synchronized void refresh(ServiceGovernanceModel oldServiceGovernanceModel, ServiceGovernanceModel newServiceGovernanceModel) {
+        //如果负载均衡策略发生变化,直接更新负载均衡策略,然后退出
+        if(oldServiceGovernanceModel.equals(newServiceGovernanceModel)) { 
             ProxyServiceCache.updateLoadbalanceStrategy(serviceName);
             return;
         }
         
+        create(newServiceGovernanceModel);
+    }
+    
+    /**
+     * 
+     * @param serviceGovernanceModel
+     */
+    private void create(ServiceGovernanceModel serviceGovernanceModel) {
         //所有的在线服务
         List<ServiceProviderNode> allOnlineNodes = RegistryCache.getOnlineNodes(serviceName);
+        //服务没有在线结点
+        if(0 == allOnlineNodes.size()) {
+            length = 0;
+            return ;
+        }
         
-        Map<ServiceProviderNode, Integer> nodesWeight = serviceGovernance.getNodesWeight();
+        Map<ServiceProviderNode, Integer> nodesWeight = serviceGovernanceModel.getNodesWeight();
         boolean sameWeight = sameWeight(allOnlineNodes, nodesWeight);
         
         //权重不一样
@@ -89,6 +100,8 @@ public class RandomLoadbalance extends AbstractLoadbalance {
             }
             providersArray = tempProviderAryWithWight;
         }
+        
+        length = providersArray.length;
     }
     
     /**

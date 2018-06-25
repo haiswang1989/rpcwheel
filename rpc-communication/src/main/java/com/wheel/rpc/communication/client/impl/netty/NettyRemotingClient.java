@@ -95,7 +95,10 @@ public class NettyRemotingClient extends AbstractRemotingClient {
 
     @Override
     public void close() {
-        group.shutdownGracefully();
-        clientChannel.close();
+        try{
+            group.shutdownGracefully();
+            clientChannel.close();
+        } catch(Exception e) {
+        }
     }
 }

@@ -7,6 +7,7 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.wheel.rpc.client.common.ClientConstants;
 import com.wheel.rpc.client.proxy.ProxyFactory;
 import com.wheel.rpc.communication.channel.IRpcWriteChannel;
 import com.wheel.rpc.communication.channel.impl.NettyRpcWriteChannel;
@@ -36,8 +37,8 @@ public class RpcClientStarter {
         try {
             is = RpcClientStarter.class.getClassLoader().getResourceAsStream("client.properties");
             prop.load(is);
-            port = Integer.parseInt(prop.getProperty("proxy.rpc.port"));
-            ioThreadCnt = Integer.parseInt(prop.getProperty("client.rpc.netty.thread.worker"));
+            port = Integer.parseInt(prop.getProperty(ClientConstants.PROXY_RPC_PORT));
+            ioThreadCnt = Integer.parseInt(prop.getProperty(ClientConstants.CLIENT_RPC_NETTY_THREAD_WORKER));
         } catch (IOException e) {
             LOG.error("", e);
             System.exit(-1);
@@ -59,8 +60,12 @@ public class RpcClientStarter {
         
         int callCnt = 0;
         while(true) {
-            String resp = proxyRef.sayHello("wanghaisheng");
-            System.out.println(callCnt++);
+            try {
+                proxyRef.sayHello("wanghaisheng");
+                System.out.println(callCnt++);
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

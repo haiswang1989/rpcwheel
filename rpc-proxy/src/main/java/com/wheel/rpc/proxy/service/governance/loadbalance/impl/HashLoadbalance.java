@@ -1,6 +1,5 @@
 package com.wheel.rpc.proxy.service.governance.loadbalance.impl;
 
-import com.wheel.rpc.core.model.RefreshCallMethod;
 import com.wheel.rpc.core.model.ServiceProviderNode;
 
 /**
@@ -22,8 +21,5 @@ public class HashLoadbalance extends AbstractLoadbalance {
     public ServiceProviderNode next() {
         return null;
     }
-    
-    @Override
-    public void refresh(RefreshCallMethod callMethod) {
-    }
+
 }

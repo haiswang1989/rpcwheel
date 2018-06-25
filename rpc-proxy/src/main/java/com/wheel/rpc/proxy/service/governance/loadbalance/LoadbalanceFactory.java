@@ -3,6 +3,7 @@ package com.wheel.rpc.proxy.service.governance.loadbalance;
 import com.wheel.rpc.cache.RegistryCache;
 import com.wheel.rpc.core.model.LoadBalance;
 import com.wheel.rpc.core.model.ServiceGovernanceModel;
+import com.wheel.rpc.core.service.governance.ILoadbalance;
 import com.wheel.rpc.proxy.service.governance.loadbalance.impl.HashLoadbalance;
 import com.wheel.rpc.proxy.service.governance.loadbalance.impl.LeastLoadLoadbalance;
 import com.wheel.rpc.proxy.service.governance.loadbalance.impl.RandomLoadbalance;
