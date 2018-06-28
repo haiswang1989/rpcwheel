@@ -34,8 +34,9 @@ public class Router {
     private Routes routes;
     private RpcRequest rpcRequest;
     
-    public Router(Routes routesArgs) {
+    public Router(Routes routesArgs, RpcRequest rpcRequestArgs) {
         this.routes = routesArgs;
+        this.rpcRequest = rpcRequestArgs;
     }
     
     /**

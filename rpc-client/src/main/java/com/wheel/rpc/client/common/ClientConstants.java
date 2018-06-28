@@ -13,4 +13,7 @@ public class ClientConstants {
     
     /*worker线程数*/
     public static final String CLIENT_RPC_NETTY_THREAD_WORKER = "client.rpc.netty.thread.worker";
+    
+    /* callerid */
+    public static final String CLIENT_RPC_CALLER_ID = "client.rpc.caller.id";
 }

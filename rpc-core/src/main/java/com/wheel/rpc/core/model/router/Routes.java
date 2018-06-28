@@ -20,9 +20,6 @@ public class Routes {
     /** 一组规则 */
     private List<Route> routes;
     
-    /** 目标机器列表 */
-    private List<TargetGroup> targetGroups;
-    
     /** TargetGroup的名称 和  TargetGroup的映射*/
     private Map<String, TargetGroup> name2TargetGroup;
     

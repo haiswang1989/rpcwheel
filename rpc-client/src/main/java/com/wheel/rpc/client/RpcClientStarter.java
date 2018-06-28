@@ -31,6 +31,7 @@ public class RpcClientStarter {
         String ip = CommonUtils.getLocalAddressIp();
         int port = 0;
         int ioThreadCnt = 0;
+        String callerId = null;
         
         Properties prop = new Properties();
         InputStream is = null;
@@ -39,6 +40,7 @@ public class RpcClientStarter {
             prop.load(is);
             port = Integer.parseInt(prop.getProperty(ClientConstants.PROXY_RPC_PORT));
             ioThreadCnt = Integer.parseInt(prop.getProperty(ClientConstants.CLIENT_RPC_NETTY_THREAD_WORKER));
+            callerId = prop.getProperty(ClientConstants.CLIENT_RPC_CALLER_ID);
         } catch (IOException e) {
             LOG.error("", e);
             System.exit(-1);
@@ -51,6 +53,7 @@ public class RpcClientStarter {
             }
         }
         
+        System.setProperty(ClientConstants.CLIENT_RPC_CALLER_ID, callerId);
         RpcClient rpcClient = new RpcClient(ip, port, ioThreadCnt);
         rpcClient.open();
         

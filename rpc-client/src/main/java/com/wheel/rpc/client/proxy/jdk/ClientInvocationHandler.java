@@ -6,8 +6,10 @@ import java.lang.reflect.Method;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.wheel.rpc.client.common.ClientConstants;
 import com.wheel.rpc.client.invoke.RequestProcesser;
 import com.wheel.rpc.communication.channel.IRpcWriteChannel;
+import com.wheel.rpc.core.common.CommonUtils;
 import com.wheel.rpc.core.exception.RpcException;
 import com.wheel.rpc.core.model.RpcRequest;
 import com.wheel.rpc.core.model.RpcResponse;
@@ -43,6 +45,8 @@ public class ClientInvocationHandler implements InvocationHandler {
         rpcRequest.setMethodName(methodName);
         rpcRequest.setParamsType(methodParamsType);
         rpcRequest.setParamsValue(args);
+        rpcRequest.setCallerId(System.getProperty(ClientConstants.CLIENT_RPC_CALLER_ID));
+        rpcRequest.setCallerIp(CommonUtils.getLocalAddressIp());
         RequestProcesser processer = new RequestProcesser(rpcWriteChannel, rpcRequest);
         RpcResponse rpcResponse = processer.doInvoke();
         if(null == rpcResponse) {

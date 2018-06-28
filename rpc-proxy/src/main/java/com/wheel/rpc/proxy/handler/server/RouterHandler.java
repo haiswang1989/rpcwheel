@@ -32,7 +32,7 @@ public class RouterHandler extends ChannelInboundHandlerAdapter {
         Routes routes = serviceGovernance.getRoutes();
         if(routes.isOpen()) {
             //路由打开了
-            Router router = new Router(routes);
+            Router router = new Router(routes, rpcRequest);
             List<ServiceProviderNode> providers = router.doRouter();
             rpcRequest.setRouterNodes(providers);
         } 
