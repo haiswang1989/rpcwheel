@@ -53,4 +53,9 @@ public interface IRegistry {
      * @return
      */
     public ServiceGovernanceModel serviceGovernanceStrategy(String serviceName);
+    
+    /**
+     * 关闭与配置中心的连接
+     */
+    public void close();
 }

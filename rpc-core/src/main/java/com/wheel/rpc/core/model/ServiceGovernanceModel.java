@@ -3,6 +3,8 @@ package com.wheel.rpc.core.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.wheel.rpc.core.model.router.Routes;
+
 import lombok.Data;
 
 /**
@@ -19,7 +21,7 @@ public class ServiceGovernanceModel {
     private static final Long DEFAULT_METHOD_TIMEOUT_THRESHOLD = 400L;
     
     /** 方法不限流 */
-    private static final int METHOD_RATELIMITER_UNLIMITED = -1;
+    private static final int METHOD_RATELIMITER_UNLIMITED = 0;
     
     /** 方法的超时 */
     /** method / 超时阈值 */
@@ -40,6 +42,9 @@ public class ServiceGovernanceModel {
     
     /** 结点的权重 - proxy*/
     private Map<ServiceProviderNode, Integer> nodesWeight = new HashMap<>();
+    
+    /** 服务的路由规则 */
+    private Routes routes = new Routes();
     
     public ServiceGovernanceModel() {
     }
@@ -64,5 +69,15 @@ public class ServiceGovernanceModel {
     public long getTimeout(String methodName) {
         Long timeout = methodsTimeout.get(methodName);
         return null==timeout ? DEFAULT_METHOD_TIMEOUT_THRESHOLD : timeout;
+    }
+    
+    /**
+     * 添加方法的限流
+     * 
+     * @param methodName
+     * @param limiter
+     */
+    public void addLimiter(String methodName, int limiter) {
+        methodsRateLimiter.put(methodName, limiter);
     }
 }

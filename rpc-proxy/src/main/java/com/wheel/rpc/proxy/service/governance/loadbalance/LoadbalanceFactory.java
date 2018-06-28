@@ -6,7 +6,7 @@ import com.wheel.rpc.core.model.ServiceGovernanceModel;
 import com.wheel.rpc.core.service.governance.ILoadbalance;
 import com.wheel.rpc.proxy.service.governance.loadbalance.impl.HashLoadbalance;
 import com.wheel.rpc.proxy.service.governance.loadbalance.impl.LeastLoadLoadbalance;
-import com.wheel.rpc.proxy.service.governance.loadbalance.impl.RandomLoadbalance;
+import com.wheel.rpc.proxy.service.governance.loadbalance.impl.OptimizedRandomLoadbalance;
 import com.wheel.rpc.proxy.service.governance.loadbalance.impl.RoundRobinLoadbalance;
 
 /**
@@ -32,7 +32,7 @@ public class LoadbalanceFactory {
                 loadBalance = new HashLoadbalance(serviceName);
                 break;
             case RANDOM:
-                loadBalance = new RandomLoadbalance(serviceName);
+                loadBalance = new OptimizedRandomLoadbalance(serviceName);
                 break;
             case LEASTLOAD:
                 loadBalance = new LeastLoadLoadbalance(serviceName);

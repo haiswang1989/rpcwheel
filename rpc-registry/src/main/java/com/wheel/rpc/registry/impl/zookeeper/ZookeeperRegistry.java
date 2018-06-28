@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 import java.util.List;
 
 import org.I0Itec.zkclient.ZkClient;
+import org.I0Itec.zkclient.exception.ZkInterruptedException;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -54,6 +55,8 @@ public class ZookeeperRegistry extends AbstractRegistry {
     public void regist(RegistryModel registryModel) {
         //服务治理相关参数的MODEL
         ServiceGovernanceModel serviceGovernanceModel = registryModel.getServiceGovernanceModel();
+        //将服务治理对象转换成JSON String
+        String data = JSONObject.toJSONString(serviceGovernanceModel);
         
         String intfClassName = registryModel.getService().getName();
         InetSocketAddress address = registryModel.getAddress();
@@ -64,6 +67,7 @@ public class ZookeeperRegistry extends AbstractRegistry {
         String servicePath = CommonUtils.getServicePath(intfClassName);
         if(!ZkUtils.exists(servicePath, zkClient)) {
             ZkUtils.createPersistentRecursion(servicePath, zkClient);
+            ZkUtils.writeData(servicePath, data, zkClient);
         }
         
         //服务提供者结点的名称ip:port {rootPath}/{serviceName}/ip:port
@@ -71,7 +75,7 @@ public class ZookeeperRegistry extends AbstractRegistry {
         //服务提供者结点的完整路径
         String serviceProviderPath = CommonUtils.appendString(servicePath, Constants.PATH_SEPARATOR, providerNodeName);
         //注册服务提供者
-        ZkUtils.registServiceProvider(serviceProviderPath, serviceGovernanceModel.toString(), zkClient);
+        ZkUtils.registServiceProvider(serviceProviderPath, "", zkClient);
     }
 
     @Override
@@ -165,5 +169,15 @@ public class ZookeeperRegistry extends AbstractRegistry {
         }
         
         return JSONObject.parseObject(json, ServiceGovernanceModel.class);
+    }
+    
+    @Override
+    public void close() {
+        try {
+            if(null != zkClient) {
+                zkClient.close();
+            }
+        } catch (ZkInterruptedException e) {
+        }
     }
 }

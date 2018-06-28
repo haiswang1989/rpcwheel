@@ -123,4 +123,14 @@ public class ZkUtils {
     public static Object getPathData(String servicePath, ZkClient zkClient) {
         return zkClient.readData(servicePath);
     }
+    
+    /**
+     * 写数据
+     * @param servicePath
+     * @param data
+     * @param zkClient
+     */
+    public static void writeData(String servicePath, String data, ZkClient zkClient) {
+        zkClient.writeData(servicePath, data);
+    }
 }

@@ -4,6 +4,12 @@ import com.wheel.rpc.communication.client.impl.netty.NettyRemotingClient;
 import com.wheel.rpc.core.model.ServiceProviderNode;
 import com.wheel.rpc.proxy.handler.client.ProxyAsClientHandler;
 
+/**
+ * 
+ * <p>Description:</p>
+ * @author hansen.wang
+ * @date 2018年6月25日 下午6:06:09
+ */
 public class NettyUtils {
     
     /**

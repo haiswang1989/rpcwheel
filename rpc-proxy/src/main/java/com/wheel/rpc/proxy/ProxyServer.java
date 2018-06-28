@@ -74,7 +74,7 @@ public class ProxyServer {
             }
             
             //设置到缓存中
-            ProxyServiceCache.setProxyServicesRemotingClients(serviceName, proxyClients);
+            ProxyServiceCache.setServiceClients(serviceName, proxyClients);
         }
     }
     

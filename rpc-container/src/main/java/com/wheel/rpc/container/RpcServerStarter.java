@@ -56,17 +56,29 @@ public class RpcServerStarter {
         registryConfigBean.setProtocol("zookeeper");
         registryConfigBean.setConnection("192.168.56.101:2181");
         
+        
+        
         IHello ref = new HelloImpl();
         ServiceConfigBean<IHello> serviceConfigBean = new ServiceConfigBean<IHello>(IHello.class, ref);
         
         List<ServiceConfigBean<?>> servicesArgs = new ArrayList<>();
         servicesArgs.add(serviceConfigBean);
         
-        RpcServer rpcServer = new RpcServer(port, workerCnt, bossCnt, servicesArgs);
+        final RpcServer rpcServer = new RpcServer(port, workerCnt, bossCnt, servicesArgs);
         rpcServer.setRegistryConfigBean(registryConfigBean);
         rpcServer.init();
         rpcServer.open();
-        
+        //将自己注册到"注册中心"
         rpcServer.register();
+        //监听变化
+        rpcServer.subscribe();
+        //优雅关机
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                rpcServer.close();
+            }
+            
+        }, "ServerShutdownHook"));
     }
 }

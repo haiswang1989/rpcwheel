@@ -11,6 +11,7 @@ import com.wheel.rpc.proxy.common.ProxyServiceCache;
 import com.wheel.rpc.proxy.netty.NettyUtils;
 
 /**
+ * 结点上下线变化的处理
  * 
  * <p>Description:</p>
  * @author hansen.wang
@@ -26,7 +27,7 @@ public class OnlineNodesChangeListener extends AbstractZkConfigChangeListener {
     
     @Override
     public void onlineNodesChange(List<ServiceProviderNode> onlineNodes, List<ServiceProviderNode> offlineNodes) {
-        ConcurrentHashMap<ServiceProviderNode, NettyRemotingClient> allRemotingClients = ProxyServiceCache.getAllRemotingClients(serviceName);
+        ConcurrentHashMap<ServiceProviderNode, NettyRemotingClient> allRemotingClients = ProxyServiceCache.serviceClients(serviceName);
         for (ServiceProviderNode offlineNode : offlineNodes) {
             NettyRemotingClient remotingClient = allRemotingClients.get(offlineNode);
             allRemotingClients.remove(offlineNode);

@@ -23,7 +23,7 @@ public class ServiceGovernChangeListener extends AbstractZkConfigChangeListener 
     @Override
     public void onGovernanceChange(ServiceGovernanceModel oldServiceGovernanceModel,
             ServiceGovernanceModel newServiceGovernanceModel) {
-        ILoadbalance serviceLoadbalance = ProxyServiceCache.servicesLoadbalanceStrategy(serviceName);
+        ILoadbalance serviceLoadbalance = ProxyServiceCache.servicesLoadbalance(serviceName);
         serviceLoadbalance.refresh(oldServiceGovernanceModel, newServiceGovernanceModel);
     }
 }

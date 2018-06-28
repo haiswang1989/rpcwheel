@@ -21,8 +21,14 @@ public class RpcRequest {
         requestId = UUID.randomUUID().toString();
     }
     
+    /** 请求client端的ID */
+    private String callerId;
+    
+    /** 请求client端的IP */
+    private String callerIp;
+    
     /** 请求的Id */
-    public String requestId; 
+    private String requestId; 
     
     /** 服务的名称 */
     private String serviceName;
@@ -36,11 +42,8 @@ public class RpcRequest {
     /** 方法的各参数的值 */
     private Object[] paramsValue;
     
-    /** 所有的服务的提供者 */
-    private List<ServiceProviderNode> allNodes;
-    
-    /** 经过路由之后,可选的提供者 */
-    private List<ServiceProviderNode> afterRouterNodes;
+    /** 经过路由之后的提供者 */
+    private List<ServiceProviderNode> routerNodes;
     
     /** 负载均衡的实现 */
     private ILoadbalance loadbalance;
@@ -49,8 +52,5 @@ public class RpcRequest {
      * 裁剪请求参数,减小带宽
      */
     public void cut() {
-        allNodes = null;
-        afterRouterNodes = null;
-        loadbalance = null;
     }
 }

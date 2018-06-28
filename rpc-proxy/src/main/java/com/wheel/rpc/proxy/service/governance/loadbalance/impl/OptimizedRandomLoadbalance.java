@@ -8,8 +8,11 @@ import com.wheel.rpc.cache.RegistryCache;
 import com.wheel.rpc.core.model.ServiceGovernanceModel;
 import com.wheel.rpc.core.model.ServiceProviderNode;
 import com.wheel.rpc.proxy.common.ProxyServiceCache;
+import com.wheel.rpc.proxy.common.ProxyUtils;
 
 /**
+ * 优化后的
+ * 
  * 负载均衡 - 随机算法
  * 
  * 优点:算法简单,无状态,可以很好的支持权重
@@ -18,7 +21,7 @@ import com.wheel.rpc.proxy.common.ProxyServiceCache;
  * @author hansen.wang
  * @date 2018年6月7日 下午4:32:32
  */
-public class RandomLoadbalance extends AbstractLoadbalance {
+public class OptimizedRandomLoadbalance extends AbstractLoadbalance {
     
     /** 生成随机数 */
     private Random random;
@@ -29,10 +32,15 @@ public class RandomLoadbalance extends AbstractLoadbalance {
     /** provider数组的长度 */
     private int length;
     
-    public RandomLoadbalance(String serviceNameArgs) {
+    public OptimizedRandomLoadbalance(String serviceNameArgs) {
         super(serviceNameArgs);
         this.random = new Random();
         create(RegistryCache.getServiceGovernance(serviceName));
+    }
+    
+    public OptimizedRandomLoadbalance(String serviceNameArgs, List<ServiceProviderNode> availableNodes) {
+        super(serviceNameArgs);
+        this.random = new Random();
     }
     
     @Override
@@ -69,7 +77,7 @@ public class RandomLoadbalance extends AbstractLoadbalance {
         }
         
         Map<ServiceProviderNode, Integer> nodesWeight = serviceGovernanceModel.getNodesWeight();
-        boolean sameWeight = sameWeight(allOnlineNodes, nodesWeight);
+        boolean sameWeight = ProxyUtils.sameWeight(allOnlineNodes, nodesWeight);
         
         //权重不一样
         if(!sameWeight) {
@@ -102,31 +110,6 @@ public class RandomLoadbalance extends AbstractLoadbalance {
         }
         
         length = providersArray.length;
-    }
-    
-    /**
-     * 判断新的提供服务的结点是否有相同的权重
-     * @param allOnlineNodes
-     * @param nodesWeight
-     * @return
-     */
-    private boolean sameWeight(List<ServiceProviderNode> allOnlineNodes, Map<ServiceProviderNode, Integer> nodesWeight) {
-        boolean sameWeight = true;
-        Integer baseWeight = null;
-        for (ServiceProviderNode serviceProviderNode : allOnlineNodes) {
-            Integer nodeWeight = nodesWeight.get(serviceProviderNode);
-            int currNodeWeight = null == nodeWeight ? 0 : nodeWeight;
-            if(null == baseWeight) {
-                baseWeight = currNodeWeight;
-            } else {
-                if(baseWeight != currNodeWeight) {
-                    sameWeight = false;
-                    break;
-                }
-            }
-        }
-        
-        return sameWeight;
     }
     
     /**

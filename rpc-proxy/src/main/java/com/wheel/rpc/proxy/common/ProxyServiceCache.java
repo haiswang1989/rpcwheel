@@ -48,14 +48,15 @@ public class ProxyServiceCache {
      */
     public static void initLoadbalanceStrategy(String serviceName) {
         ILoadbalance loadbalance = LoadbalanceFactory.createLoadbalance(serviceName);
-        //ILoadbalance监听配置中心的变化
-        RegistryCache.addListener(serviceName, new OnlineNodesChangeListener(serviceName));
-        RegistryCache.addListener(serviceName, new ServiceGovernChangeListener(serviceName));
         SERVICES_LOADBALANCE_STRATEGY.put(serviceName, loadbalance);
+        //监听Provider结点的上下线
+        RegistryCache.addListener(serviceName, new OnlineNodesChangeListener(serviceName));
+        //监听服务的治理参数的变化
+        RegistryCache.addListener(serviceName, new ServiceGovernChangeListener(serviceName));
     }
     
     /**
-     * 更新新的负载均衡策略
+     * 重新初始化负载均衡策略
      * @param serviceName
      */
     public static void updateLoadbalanceStrategy(String serviceName) {
@@ -65,21 +66,21 @@ public class ProxyServiceCache {
     }
     
     /**
-     * 
+     * 设置服务Proxy与服务的Provider的连接对象
      * @param serviceName
      * @param proxyClients
      */
-    public static void setProxyServicesRemotingClients(String serviceName, ConcurrentHashMap<ServiceProviderNode, NettyRemotingClient> proxyClients) {
+    public static void setServiceClients(String serviceName, ConcurrentHashMap<ServiceProviderNode, NettyRemotingClient> proxyClients) {
         SERVICES_NODES_REMOTINGCLIENTS.put(serviceName, proxyClients);
     }
     
     /**
-     * 获取Proxy与指定服务的指定Provider的RomtingClient
+     * 获取Proxy与指定服务的指定Provider的连接
      * @param serviceName 服务名称
      * @param serviceProviderNode 服务provider
      * @return
      */
-    public static NettyRemotingClient getNettyRemotingClient(String serviceName, ServiceProviderNode serviceProviderNode) {
+    public static NettyRemotingClient getServiceTargetClient(String serviceName, ServiceProviderNode serviceProviderNode) {
         ConcurrentHashMap<ServiceProviderNode, NettyRemotingClient> providerNode2RomtingClient = SERVICES_NODES_REMOTINGCLIENTS.get(serviceName);
         if(null != providerNode2RomtingClient) {
             return providerNode2RomtingClient.get(serviceProviderNode);
@@ -93,7 +94,7 @@ public class ProxyServiceCache {
      * @param serviceName
      * @return
      */
-    public static ConcurrentHashMap<ServiceProviderNode, NettyRemotingClient> getAllRemotingClients(String serviceName) {
+    public static ConcurrentHashMap<ServiceProviderNode, NettyRemotingClient> serviceClients(String serviceName) {
         ConcurrentHashMap<ServiceProviderNode, NettyRemotingClient> allRomtingClients = SERVICES_NODES_REMOTINGCLIENTS.get(serviceName);
         if(null == allRomtingClients) {
             allRomtingClients = new ConcurrentHashMap<>();
@@ -108,7 +109,7 @@ public class ProxyServiceCache {
      * @param serviceName
      * @return
      */
-    public static ILoadbalance servicesLoadbalanceStrategy(String serviceName) {
+    public static ILoadbalance servicesLoadbalance(String serviceName) {
         return SERVICES_LOADBALANCE_STRATEGY.get(serviceName);
     }
 }

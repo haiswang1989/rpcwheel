@@ -60,10 +60,19 @@ public class RpcClientStarter {
         
         int callCnt = 0;
         while(true) {
+            int count = 0;
+            while(count++ < 305) {
+                try {
+                    proxyRef.sayHello("wanghaisheng");
+                    System.out.println(callCnt++);
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            
             try {
-                proxyRef.sayHello("wanghaisheng");
-                System.out.println(callCnt++);
-            } catch(Exception e) {
+                Thread.sleep(1000l);
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }

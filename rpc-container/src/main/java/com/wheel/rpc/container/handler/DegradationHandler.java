@@ -1,5 +1,15 @@
 package com.wheel.rpc.container.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.wheel.rpc.cache.RegistryCache;
+import com.wheel.rpc.core.exception.DegradationException;
+import com.wheel.rpc.core.model.RpcRequest;
+import com.wheel.rpc.core.model.RpcResponse;
+import com.wheel.rpc.core.model.RpcStatus;
+import com.wheel.rpc.core.model.ServiceGovernanceModel;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -14,8 +24,26 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
  */
 public class DegradationHandler extends ChannelInboundHandlerAdapter {
     
+    public static final Logger LOG = LoggerFactory.getLogger(DegradationHandler.class);
+    
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        ctx.fireChannelRead(msg);
+        RpcRequest rpcRequest = (RpcRequest)msg;
+        String serviceName = rpcRequest.getServiceName();
+        ServiceGovernanceModel serviceGovernance = RegistryCache.getServiceGovernance(serviceName);
+        boolean isDegradation = serviceGovernance.isDegradation();
+        if(isDegradation) {
+            String msgInfo = String.format("Service is degradation, serviceName : %s", serviceName);
+            LOG.info(msgInfo);
+            //服务被降级了
+            DegradationException degradationException = new DegradationException(msgInfo);
+            RpcResponse rpcResponse = new RpcResponse();
+            rpcResponse.setE(degradationException);
+            rpcResponse.setRequestId(rpcRequest.getRequestId());
+            rpcResponse.setStatus(RpcStatus.ERROR);
+            ctx.writeAndFlush(rpcResponse);
+        } else {
+            ctx.fireChannelRead(msg);
+        }
     }
 }

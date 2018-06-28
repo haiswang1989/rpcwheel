@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import com.wheel.rpc.core.config.bean.ServiceConfigBean;
 import com.wheel.rpc.core.config.listener.IZkConfigChangeListener;
 import com.wheel.rpc.core.exception.RpcException;
 import com.wheel.rpc.core.model.ServiceGovernanceModel;
@@ -42,9 +43,27 @@ public class RegistryCache {
      * @param zkClient
      * @param clazzes
      */
-    public static void init(List<Class<?>> clazzes) {
+    public static void initByClasses(List<Class<?>> clazzes) {
         check();
         for (Class<?> clazz : clazzes) {
+            ServiceGovernanceModel serviceGovernanceModel = registry.serviceGovernanceStrategy(clazz.getName());
+            //服务的治理信息
+            SERVICES_GOVERNANCE_STRATEGY.put(clazz.getName(), serviceGovernanceModel);
+            List<ServiceProviderNode> allOnlineNodes = registry.serviceOnlineNodes(clazz.getName());
+            //服务的在线结点
+            SERVICES_PROVIDERS.put(clazz.getName(), allOnlineNodes);
+        }
+    }
+    
+    /**
+     * 初始化服务配置
+     * @param zkClient
+     * @param clazzes
+     */
+    public static void initByServiceConfigBean(List<ServiceConfigBean<?>> serviceConfigBeans) {
+        check();
+        for (ServiceConfigBean<?> serviceConfigBean : serviceConfigBeans) {
+            Class<?> clazz = serviceConfigBean.getInterfaceClazz();
             ServiceGovernanceModel serviceGovernanceModel = registry.serviceGovernanceStrategy(clazz.getName());
             //服务的治理信息
             SERVICES_GOVERNANCE_STRATEGY.put(clazz.getName(), serviceGovernanceModel);

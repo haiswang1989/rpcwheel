@@ -23,7 +23,7 @@ public class LoadbalanceHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         RpcRequest request = (RpcRequest)msg;
         String serviceName = request.getServiceName();
-        ILoadbalance loadbalance = ProxyServiceCache.servicesLoadbalanceStrategy(serviceName);
+        ILoadbalance loadbalance = ProxyServiceCache.servicesLoadbalance(serviceName);
         request.setLoadbalance(loadbalance);
         ctx.fireChannelRead(msg);
     }

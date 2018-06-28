@@ -1,10 +1,12 @@
 package com.wheel.rpc.container;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 
+import com.wheel.rpc.cache.RegistryCache;
 import com.wheel.rpc.communication.server.impl.netty.NettyRemotingServer;
 import com.wheel.rpc.container.common.ServicesRefCache;
 import com.wheel.rpc.container.handler.ServerChildChannelInitializer;
@@ -14,6 +16,8 @@ import com.wheel.rpc.core.config.bean.ServiceConfigBean;
 import com.wheel.rpc.core.exception.RpcException;
 import com.wheel.rpc.core.model.RegistryModel;
 import com.wheel.rpc.core.model.ServiceGovernanceModel;
+import com.wheel.rpc.notify.INotify;
+import com.wheel.rpc.notify.NotifyFactory;
 import com.wheel.rpc.registry.IRegistry;
 import com.wheel.rpc.registry.RegistryFactory;
 
@@ -45,6 +49,12 @@ public class RpcServer {
     /** 注册中心 */
     private IRegistry registry;
     
+    /** Netty Server */
+    private NettyRemotingServer server;
+    
+    /** 注册的MODELS */
+    private List<RegistryModel> registryModels;
+    
     public RpcServer(int port, List<ServiceConfigBean<?>> servicesArgs) {
         this(port, 0, 0, servicesArgs);
     }
@@ -54,6 +64,7 @@ public class RpcServer {
         this.workerThreadCnt = workerThreadCnt;
         this.bossThreadCnt = bossThreadCnt;
         this.services = servicesArgs;
+        registryModels = new ArrayList<>();
         
     }
     
@@ -63,6 +74,9 @@ public class RpcServer {
     public void init() {
         check();
         registry = RegistryFactory.createRegistry(registryConfigBean);
+        RegistryCache.setRegistry(registry);
+        RegistryCache.initByServiceConfigBean(services);
+        
     }
     
     /**
@@ -82,11 +96,25 @@ public class RpcServer {
      * 
      */
     public void open() {
-        NettyRemotingServer server = new NettyRemotingServer(workerThreadCnt, bossThreadCnt, port);
+        server = new NettyRemotingServer(workerThreadCnt, bossThreadCnt, port);
         server.setChildChannelInitializer(new ServerChildChannelInitializer());
         server.init();
         server.open();
         server.waitForDown();
+    }
+    
+    /**
+     * 
+     */
+    public void close() {
+        //先将自己从配置中心下线,Proxy端就不再看到自己
+        for (RegistryModel registryModel : registryModels) {
+            registry.unregist(registryModel);
+        }
+        //断开与配置中心的连接
+        registry.close();
+        //关闭server端
+        server.close();
     }
     
     /**
@@ -103,6 +131,20 @@ public class RpcServer {
             registryModel.setAddress(new InetSocketAddress(CommonUtils.getLocalAddressIp(), port));
             registryModel.setServiceGovernanceModel(new ServiceGovernanceModel());
             registry.regist(registryModel);
+            
+            //缓存起来,用于后面unRegistry
+            registryModels.add(registryModel);
+        }
+    }
+    
+    /**
+     * 监听变化
+     */
+    public void subscribe() {
+        for (ServiceConfigBean<?> serviceConfigBean : services) {
+            String serviceName = serviceConfigBean.getInterfaceClazz().getName();
+            INotify notify = NotifyFactory.createNotify(serviceName, registryConfigBean);
+            registry.subscribe(notify);
         }
     }
 }

@@ -71,7 +71,7 @@ public class ProxyServerStarter {
         IRegistry registry = RegistryFactory.createRegistry(registryConfigBean);
         //配置中心的缓存的初始化
         RegistryCache.setRegistry(registry);
-        RegistryCache.init(proxyServices);
+        RegistryCache.initByClasses(proxyServices);
         
         //proxy端 service相关的初始化
         ProxyServiceCache.init(proxyServices);

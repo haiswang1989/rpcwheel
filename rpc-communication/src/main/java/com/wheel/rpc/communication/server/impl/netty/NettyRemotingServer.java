@@ -101,9 +101,12 @@ public class NettyRemotingServer extends AbstractRemotingServer {
     
     @Override
     public void close() {
-        bossGroup.shutdownGracefully();
-        workerGroup.shutdownGracefully();
-        //关闭通道
-        channelFuture.channel().close();
+        try {
+            bossGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully();
+            //关闭通道
+            channelFuture.channel().close();
+        } catch(Exception e) {
+        }
     }
 }
