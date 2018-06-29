@@ -48,8 +48,6 @@ public class NormalRandomLoadbalance extends AbstractLoadbalance {
      */
     private void init() {
         ServiceGovernanceModel serviceGovernance = RegistryCache.getServiceGovernance(serviceName);
-        List<ServiceProviderNode> allOnlineNodes = RegistryCache.getOnlineNodes(serviceName);
-        availableProviders.retainAll(allOnlineNodes);
         nodesWeight = serviceGovernance.getNodesWeight();
         Object[] sameWeightAndWeightSum = ProxyUtils.sameWeightAndWeightSum(availableProviders, nodesWeight);
         sameWeight = (boolean)sameWeightAndWeightSum[0];

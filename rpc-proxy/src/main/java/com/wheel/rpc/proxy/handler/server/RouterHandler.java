@@ -31,10 +31,25 @@ public class RouterHandler extends ChannelInboundHandlerAdapter {
         ServiceGovernanceModel serviceGovernance = RegistryCache.getServiceGovernance(serviceName);
         Routes routes = serviceGovernance.getRoutes();
         if(routes.isOpen()) {
+            //开启了路由就不走LoadBalance就不能走优化了
+            rpcRequest.setCanOptimize(false);
             //路由打开了
             Router router = new Router(routes, rpcRequest);
-            List<ServiceProviderNode> providers = router.doRouter();
-            rpcRequest.setRouterNodes(providers);
+            //路由有效结点
+            List<ServiceProviderNode> routerRroviders = router.doRouter();
+            //有效结点的基准
+            List<ServiceProviderNode> baseProviders;
+            //是否有熔断
+            if(serviceGovernance.getCircuitBreakerModel().isCircuitBreakerEnabled()) {
+                //如果开启了熔断,就以熔断后的结果为基准
+                baseProviders = rpcRequest.getAvailableProviders();
+            } else {
+                //如果没有开启熔断,那么就以注册中心的结果为基准
+                baseProviders = RegistryCache.getOnlineNodes(serviceName);
+            }
+            
+            baseProviders.retainAll(routerRroviders);
+            rpcRequest.setAvailableProviders(baseProviders);
         } 
         
         ctx.fireChannelRead(msg);

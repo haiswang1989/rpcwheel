@@ -24,6 +24,7 @@ public class ProxyAsServerChildHandler extends ChannelInitializer<NioSocketChann
                      .addLast(new SerializeHandler()) //outbound
                      .addLast(new DecodeHandler(Integer.MAX_VALUE, 0, 4, 0, 4)) //inbound,解码
                      .addLast(new DeserializeHandler<>(RpcRequest.class)) //inbound,将request进行反序列化
+                     .addLast(new CircuitbreakerHandler()) //inbound,熔断
                      .addLast(new RouterHandler()) //inbound,路由
                      .addLast(new LoadbalanceHandler()) //inbound,负载均衡
                      .addLast(new RequestForwardHandler());  //inbound,将请求进行转发,发送到server端

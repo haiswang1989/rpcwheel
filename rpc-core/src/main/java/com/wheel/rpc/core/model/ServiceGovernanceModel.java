@@ -3,6 +3,7 @@ package com.wheel.rpc.core.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.wheel.rpc.core.model.circuitbreaker.CircuitBreakerModel;
 import com.wheel.rpc.core.model.router.Routes;
 
 import lombok.Data;

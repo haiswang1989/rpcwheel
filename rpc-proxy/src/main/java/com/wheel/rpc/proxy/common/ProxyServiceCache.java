@@ -1,5 +1,6 @@
 package com.wheel.rpc.proxy.common;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,6 +29,9 @@ public class ProxyServiceCache {
     
     /** service对应的负载均衡器 */ 
     private static final ConcurrentHashMap<String, ILoadbalance> SERVICES_LOADBALANCE_STRATEGY = new ConcurrentHashMap<>();
+    
+    /** servicename - 被熔断的服务列表 */
+    private static final ConcurrentHashMap<String, List<ServiceProviderNode>> SERVICES_CIRCUITBREAKER_PROVIDERS = new ConcurrentHashMap<>();
     
     /**
      * 
@@ -111,5 +115,20 @@ public class ProxyServiceCache {
      */
     public static ILoadbalance servicesLoadbalance(String serviceName) {
         return SERVICES_LOADBALANCE_STRATEGY.get(serviceName);
+    }
+    
+    /**
+     * 获取服务的熔断列表
+     * @param serviceName
+     * @return
+     */
+    public static List<ServiceProviderNode> getCircuitbreakerProviders(String serviceName) {
+        List<ServiceProviderNode> circuitbreakerProviders = SERVICES_CIRCUITBREAKER_PROVIDERS.get(serviceName);
+        if(null == circuitbreakerProviders) {
+            circuitbreakerProviders = new ArrayList<>();
+            SERVICES_CIRCUITBREAKER_PROVIDERS.put(serviceName, circuitbreakerProviders);
+        }
+        
+        return circuitbreakerProviders;
     }
 }

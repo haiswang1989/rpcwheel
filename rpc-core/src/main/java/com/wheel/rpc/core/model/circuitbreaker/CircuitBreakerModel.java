@@ -1,4 +1,4 @@
-package com.wheel.rpc.core.model;
+package com.wheel.rpc.core.model.circuitbreaker;
 
 import lombok.Data;
 

@@ -1,6 +1,5 @@
 package com.wheel.rpc.proxy.handler.server;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,16 +31,16 @@ public class RequestForwardHandler extends ChannelInboundHandlerAdapter {
     
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        RpcRequest request = (RpcRequest)msg;
-        String serviceName = request.getServiceName();
+        RpcRequest rpcRequest = (RpcRequest)msg;
+        String serviceName = rpcRequest.getServiceName();
         ServiceProviderNode providerNode = null;
         ILoadbalance loadbalance = null;
-        if(CollectionUtils.isNotEmpty(request.getRouterNodes())) {
+        if(rpcRequest.isCanOptimize()) {
             //有路由的
-            loadbalance = new NormalRandomLoadbalance(request.getRouterNodes(), serviceName);
+            loadbalance = new NormalRandomLoadbalance(rpcRequest.getAvailableProviders(), serviceName);
         } else {
             //无路由的,优化过的
-            loadbalance = request.getLoadbalance();
+            loadbalance = rpcRequest.getLoadbalance();
         }
         
         providerNode = loadbalance.next();
@@ -54,9 +53,9 @@ public class RequestForwardHandler extends ChannelInboundHandlerAdapter {
             rpcResponse = new RpcResponse();
             rpcResponse.setE(ex);
             rpcResponse.setStatus(RpcStatus.ERROR);
-            rpcResponse.setRequestId(request.getRequestId());
+            rpcResponse.setRequestId(rpcRequest.getRequestId());
         } else {
-            NettyRemotingClient nettyRemotingClient = ProxyServiceCache.getServiceTargetClient(request.getServiceName(), providerNode);
+            NettyRemotingClient nettyRemotingClient = ProxyServiceCache.getServiceTargetClient(rpcRequest.getServiceName(), providerNode);
             if(null == nettyRemotingClient) {
                 //TODO 这边可能获取不到指定的连接
                 //服务的Provider刚刚下线,proxy端还没有感知
@@ -65,9 +64,9 @@ public class RequestForwardHandler extends ChannelInboundHandlerAdapter {
                 return ;
             }
             
-            RpcResponseHolder rpcResponseHolder = ProxyRequestCache.setRequest(request);
+            RpcResponseHolder rpcResponseHolder = ProxyRequestCache.setRequest(rpcRequest);
             //通过proxy与server端的连接,将请求转发到server端
-            nettyRemotingClient.getClientChannel().writeAndFlush(request);
+            nettyRemotingClient.getClientChannel().writeAndFlush(rpcRequest);
             rpcResponse = rpcResponseHolder.get(1000l);
             if(null==rpcResponse) {
                 String errMsg = String.format("Request timeout, serviceName : %s", serviceName);
@@ -76,7 +75,7 @@ public class RequestForwardHandler extends ChannelInboundHandlerAdapter {
                 rpcResponse = new RpcResponse();
                 rpcResponse.setE(ex);
                 rpcResponse.setStatus(RpcStatus.ERROR);
-                rpcResponse.setRequestId(request.getRequestId());
+                rpcResponse.setRequestId(rpcRequest.getRequestId());
             }
         }
         

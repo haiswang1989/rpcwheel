@@ -42,11 +42,14 @@ public class RpcRequest {
     /** 方法的各参数的值 */
     private Object[] paramsValue;
     
-    /** 经过路由之后的提供者 */
-    private List<ServiceProviderNode> routerNodes;
-    
     /** 负载均衡的实现 */
     private ILoadbalance loadbalance;
+    
+    /** 有效的provider */
+    private List<ServiceProviderNode> availableProviders;
+    
+    /** 是否可以走优化的LoadBalance */
+    private boolean canOptimize = true;
     
     /**
      * 裁剪请求参数,减小带宽
