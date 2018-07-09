@@ -25,7 +25,7 @@ public class LoadbalanceFactory {
      */
     public static ILoadbalance createLoadbalance(String serviceName) {
         ServiceGovernanceModel serviceGovernance = RegistryCache.getServiceGovernance(serviceName);
-        LoadBalance loadBalanceStrategy = serviceGovernance.getLoadbalance();
+        LoadBalance loadBalanceStrategy = serviceGovernance.getLoadbalanceType();
         ILoadbalance loadBalance = null;
         switch (loadBalanceStrategy) {
             case HASH:

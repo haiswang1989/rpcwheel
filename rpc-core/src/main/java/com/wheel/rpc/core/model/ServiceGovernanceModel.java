@@ -29,7 +29,7 @@ public class ServiceGovernanceModel {
     private Map<String, Long> methodsTimeout = new HashMap<>();
     
     /** 负载均衡策略 - proxy */
-    private LoadBalance loadbalance = LoadBalance.RANDOM;
+    private LoadBalance loadbalanceType = LoadBalance.RANDOM;
     
     /** 是否降级 - server */
     public boolean isDegradation = false;
@@ -46,6 +46,15 @@ public class ServiceGovernanceModel {
     
     /** 服务的路由规则 */
     private Routes routes = new Routes();
+    
+    /** 服务的容错策略 */
+    private FailTolerance failToleranceStrategyType = FailTolerance.FAILOVER;
+    
+    /** 容错策略为FAILOVER时的尝试次数 */
+    private int failOverTryCount = 2;
+    
+    /** 容错策略为FORKING时的并行度 */
+    private int forkingParallelism = 2;
     
     public ServiceGovernanceModel() {
     }

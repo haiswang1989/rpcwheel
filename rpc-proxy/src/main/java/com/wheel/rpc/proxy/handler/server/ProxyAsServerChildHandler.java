@@ -27,6 +27,6 @@ public class ProxyAsServerChildHandler extends ChannelInitializer<NioSocketChann
                      .addLast(new CircuitbreakerHandler()) //inbound,熔断
                      .addLast(new RouterHandler()) //inbound,路由
                      .addLast(new LoadbalanceHandler()) //inbound,负载均衡
-                     .addLast(new RequestForwardHandler());  //inbound,将请求进行转发,发送到server端
+                     .addLast(new FailToleranceHandler());  //inbound,将请求进行转发,发送到server端
     }
 }

@@ -5,6 +5,7 @@ import com.wheel.rpc.core.common.Constants;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * 服务的提供结点
@@ -16,6 +17,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @AllArgsConstructor
 @EqualsAndHashCode
+@ToString
 public class ServiceProviderNode {
     
     public ServiceProviderNode(String ipPort) {
